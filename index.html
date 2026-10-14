@@ -1,0 +1,1988 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vault</title>
+<meta name="apple-mobile-web-app-title" content="vault.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<meta name="description" content="More value from every card. Know which card to use and never miss a credit.">
+<meta name="theme-color" content="#F6F4EF">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one calm mobile column (max 34rem). Flat surfaces, hairline borders, one forest-green accent. */
+:root{
+  --bg:#F6F4EF; --surface:#FFFFFF; --surface-2:#EFECE6; --ink:#24251F; --ink-2:#3A3B35; --muted:#6F7069;
+  --line:#E3DFD6; --line-2:#D6D1C6; --brand:#2B3D33; --brand-text:#2B3D33; --accent:#2E5B45; --accent-ink:#FFFFFF; --accent-soft:#E4ECE6; --accent-text:#2E5B45;
+  --good:#2E6B4B; --good-soft:#E1EEE5; --warn:#8C6216; --warn-soft:#F5ECDA; --bad:#A23B2E; --bad-soft:#F6E2DE;
+  --shadow:0 1px 2px rgba(36,37,31,.04), 0 6px 18px -12px rgba(36,37,31,.18);
+  --font:"Geist", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --r-lg:20px; --r-md:14px; --r-sm:10px; --r-pill:999px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#131412; --surface:#1B1C19; --surface-2:#242520; --ink:#ECEAE3; --ink-2:#D6D4CC; --muted:#9A9990;
+  --line:#2C2D28; --line-2:#3A3B35; --brand:#2F4A3B; --brand-text:#D8E6DC; --accent:#7DB192; --accent-ink:#0F1A13; --accent-soft:#1D2A22; --accent-text:#93C3A6;
+  --good:#7DB192; --good-soft:#1D2A22; --warn:#D9A957; --warn-soft:#2E2617; --bad:#E07A6C; --bad-soft:#3A201C;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.6); color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#131412; --surface:#1B1C19; --surface-2:#242520; --ink:#ECEAE3; --ink-2:#D6D4CC; --muted:#9A9990;
+  --line:#2C2D28; --line-2:#3A3B35; --brand:#2F4A3B; --brand-text:#D8E6DC; --accent:#7DB192; --accent-ink:#0F1A13; --accent-soft:#1D2A22; --accent-text:#93C3A6;
+  --good:#7DB192; --good-soft:#1D2A22; --warn:#D9A957; --warn-soft:#2E2617; --bad:#E07A6C; --bad-soft:#3A201C;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.6); color-scheme:dark }
+
+*{box-sizing:border-box}
+html,body{background:var(--bg); color:var(--ink)}
+body{font-family:var(--font); font-size:16px; line-height:1.45; -webkit-font-smoothing:antialiased; letter-spacing:-.005em}
+button,input,select,textarea{font:inherit; color:inherit; letter-spacing:inherit}
+button{cursor:pointer}
+a{color:var(--accent-text)}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:8px}
+.wrap{max-width:34rem; margin:0 auto; padding-inline:20px; padding-block:16px 116px}
+
+h1,h2,h3{margin:0; text-wrap:balance; font-weight:600; letter-spacing:-.02em}
+.h1{font-size:1.75rem; line-height:1.15}
+.h2{font-size:1.2rem; line-height:1.25}
+.h3{font-size:1rem}
+.sec{font-size:.8rem; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin:0 0 10px}
+.eyebrow{font-size:.75rem; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.subhead{font-size:.75rem; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+.num{font-variant-numeric:tabular-nums}
+.stack{display:flex; flex-direction:column; gap:12px}
+.stack-lg{display:flex; flex-direction:column; gap:26px}
+.row-flex{display:flex; align-items:center; gap:10px}
+.spread{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.grow{flex:1; min-width:0}
+.lede{margin:0; color:var(--muted)} .lede b{color:var(--ink); font-size:1.4rem; font-weight:600; letter-spacing:-.02em}
+
+/* header */
+.top{display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:44px}
+.brand{display:flex; align-items:center; gap:9px; font-weight:700; font-size:1.15rem; letter-spacing:-.03em; color:var(--brand-text)}
+.brand-mark{width:28px; height:28px; border-radius:8px; background:var(--brand); color:#fff; display:grid; place-items:center; font-size:.8rem; font-weight:700}
+.icon-btn{width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:var(--surface); display:grid; place-items:center; color:var(--ink)}
+.back{display:inline-flex; align-items:center; gap:4px; border:0; background:none; padding:8px 0; font-weight:500; color:var(--ink)}
+
+/* buttons */
+.btn{border:1px solid var(--line-2); background:var(--surface); border-radius:12px; padding:10px 16px; font-weight:600; display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; text-decoration:none; color:var(--ink)}
+.btn:hover{border-color:var(--muted)}
+.btn-primary,.btn-accent{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+.btn-primary:hover,.btn-accent:hover{border-color:var(--accent); filter:brightness(1.06)}
+.btn-ghost{background:transparent}
+.btn-small{min-height:36px; padding:7px 14px; font-size:.9rem; border-radius:10px}
+.btn-block{width:100%}
+.btn-danger{color:var(--bad)}
+.btn:disabled{opacity:.4; cursor:default; filter:none}
+.link{background:none; border:0; padding:0; color:var(--accent-text); font-weight:600; text-decoration:none}
+.link:hover{text-decoration:underline; text-underline-offset:3px}
+
+/* surfaces */
+.list,.card-box{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg)}
+.list{overflow:hidden}
+.card-box{padding:4px 16px}
+.note{background:var(--surface-2); border-radius:var(--r-md); padding:12px 14px; font-size:.92rem}
+.empty{padding:22px 18px; text-align:center; color:var(--muted)}
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chip{border:1px solid var(--line-2); background:var(--surface); border-radius:var(--r-pill); padding:7px 14px; font-size:.9rem; font-weight:500; text-align:left}
+.chip:hover{border-color:var(--muted)}
+.chip.on{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+.pill{font-size:.75rem; font-weight:600; padding:3px 9px; border-radius:var(--r-pill); background:var(--surface-2); color:var(--muted); white-space:nowrap}
+.pill.hot{background:var(--warn-soft); color:var(--warn)}
+.pill.warm{background:var(--accent-soft); color:var(--accent-text)}
+.pill.done{background:var(--good-soft); color:var(--good)}
+.flag{display:inline-flex; align-items:center; font-size:.75rem; font-weight:600; padding:2px 8px; border-radius:var(--r-pill); background:var(--warn-soft); color:var(--warn)}
+.meter{height:6px; border-radius:6px; background:var(--surface-2); overflow:hidden}
+.meter > i{display:block; height:100%; background:var(--accent); border-radius:6px}
+
+/* home */
+.home{display:flex; flex-direction:column; gap:14px; padding-top:min(6vh, 44px)}
+.hello{margin:0; font-weight:500; color:var(--muted); display:flex; align-items:center; gap:8px}
+.ask{background:var(--surface); border:1px solid var(--line); border-radius:24px; padding:22px 18px 18px; display:flex; flex-direction:column; gap:14px; box-shadow:var(--shadow)}
+.ask-q{font-size:1.85rem; line-height:1.12; font-weight:600; letter-spacing:-.03em}
+.ask-form{display:flex; gap:8px; background:var(--bg); border:1px solid var(--line-2); border-radius:14px; padding:5px 5px 5px 16px; align-items:center}
+.ask-form:focus-within{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.ask-form input{flex:1; min-width:0; border:0; background:transparent; outline:none; font-size:1rem; padding:9px 0}
+.ask-form input::placeholder{color:var(--muted)}
+.ask-go{width:42px; height:42px; border-radius:10px; border:0; background:var(--accent); color:var(--accent-ink); display:grid; place-items:center; flex:none}
+.qmenu{position:relative}
+.qmenu-btn{width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; border:1px solid var(--line); background:transparent; border-radius:12px; padding:11px 14px; font-weight:500; color:var(--muted)}
+.qmenu-btn:hover{border-color:var(--line-2); color:var(--ink)}
+.qmenu-btn[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.qmenu-list{position:absolute; left:0; right:0; top:calc(100% + 6px); background:var(--surface); border:1px solid var(--line-2); border-radius:16px; padding:6px; z-index:15; box-shadow:0 18px 40px -18px rgba(0,0,0,.35); display:flex; flex-direction:column; max-height:min(292px, 46vh); overflow-y:auto; overscroll-behavior:contain; -webkit-mask-image:linear-gradient(#000 86%, transparent); mask-image:linear-gradient(#000 86%, transparent)}
+.qmenu-list[hidden]{display:none}
+.qmenu-list button{border:0; background:transparent; text-align:left; padding:11px 12px; border-radius:10px; font-weight:500}
+.qmenu-list button:hover{background:var(--surface-2)}
+.qmenu-list button:last-child{margin-bottom:22px}
+.chev{transition:transform .15s; flex:none}
+.row-link{display:flex; align-items:center; gap:12px; width:100%; border:1px solid var(--line); background:var(--surface); border-radius:var(--r-md); padding:13px 16px; text-align:left; color:var(--ink); font-weight:500}
+.row-link:hover{border-color:var(--line-2)}
+.row-link.subtle{background:transparent}
+.row-link svg:first-child{color:var(--accent-text)}
+.due{display:flex; align-items:center; gap:10px; border:1px solid transparent; background:var(--warn-soft); color:var(--ink); border-radius:var(--r-md); padding:12px 14px; text-align:left; font-size:.94rem; width:100%}
+.due svg:first-child{color:var(--warn); flex:none}
+.due.static{cursor:default}
+
+/* answer */
+.answer{background:var(--surface); border:1px solid var(--line-2); border-radius:var(--r-lg); padding:18px; display:flex; flex-direction:column; gap:12px; box-shadow:var(--shadow); animation:fadein .2s ease-out}
+.answer:focus{outline:none}
+.pick{display:flex; gap:14px; align-items:flex-start}
+.pick-name{font-size:1.25rem; font-weight:600; letter-spacing:-.02em; line-height:1.2}
+.pick-why{margin:4px 0 0; color:var(--ink-2)}
+.answer-line{margin:0; font-size:.94rem; color:var(--ink-2)}
+.answer-line.heads{color:var(--muted)} .answer-line.heads b{color:var(--ink)}
+.answer-line.upsell{background:var(--accent-soft); border-radius:var(--r-sm); padding:10px 12px; color:var(--ink)}
+.answer-foot{display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:2px}
+.why{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px; font-size:.93rem}
+.why li{padding-left:16px; position:relative}
+.why li::before{content:""; position:absolute; left:2px; top:.62em; width:5px; height:5px; border-radius:50%; background:var(--muted)}
+.alt-row{display:block; padding:6px 0; font-size:.92rem}
+.src{font-size:.82rem; color:var(--muted); margin:0}
+details > summary{list-style:none; cursor:pointer}
+details > summary::-webkit-details-marker{display:none}
+details[open] > summary .chev{transform:rotate(180deg)}
+.more{border-top:1px solid var(--line); padding-top:10px}
+.more > summary,.done-d > summary{display:flex; align-items:center; gap:6px; font-weight:500; font-size:.9rem; color:var(--muted)}
+
+/* card art (original, flat) */
+.ccard{position:relative; aspect-ratio:1.586; border-radius:16px; padding:16px 18px; color:#fff; display:flex; flex-direction:column; justify-content:space-between; overflow:hidden; border:0; text-align:left; max-width:100%; box-shadow:0 1px 0 rgba(255,255,255,.12) inset, 0 12px 26px -16px rgba(0,0,0,.55)}
+.ccard .stamp{display:none}
+.ccard .issuer{font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; font-weight:600; opacity:.8; position:relative; z-index:1}
+.ccard .cname{font-weight:600; font-size:1.2rem; letter-spacing:-.01em; line-height:1.1; position:relative; z-index:1}
+.ccard .net{font-size:.7rem; font-weight:600; letter-spacing:.06em; opacity:.75}
+.ccard .chipart{width:30px; height:22px; border-radius:5px; background:rgba(255,255,255,.28); border:1px solid rgba(255,255,255,.35); position:relative; z-index:1}
+.c-gold{background:#B39561; color:#211A0D}
+.c-plat{background:#BFC0BB; color:#1E1F1C}
+.c-csr{background:#1E2A43}
+.c-bilt{background:#38393B}
+.c-gold .chipart,.c-plat .chipart{background:rgba(0,0,0,.1); border-color:rgba(0,0,0,.14)}
+.mini{display:inline-block; width:28px; height:18px; border-radius:4px; flex:none; position:relative; vertical-align:middle}
+.mini::after{content:""; position:absolute; left:4px; top:5px; width:7px; height:5px; border-radius:1.5px; background:rgba(255,255,255,.45)}
+.mini.c-gold::after,.mini.c-plat::after{background:rgba(0,0,0,.14)}
+.mini.big{width:48px; height:31px; border-radius:6px; margin-top:2px}
+.mini.big::after{left:7px; top:8px; width:11px; height:8px; border-radius:2px}
+.carousel{position:relative; display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; padding:4px 2px 10px; scrollbar-width:none}
+.carousel::-webkit-scrollbar{display:none}
+.carousel .ccard{flex:0 0 min(76%, 290px); scroll-snap-align:center; transition:opacity .2s; opacity:.45}
+.carousel .ccard.sel{opacity:1}
+
+/* onboarding */
+.pick-cards{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.pick-card{border:0; padding:0; background:transparent; position:relative; border-radius:16px}
+.pick-card .ccard{width:100%; outline:2px solid transparent; outline-offset:3px; transition:outline-color .15s}
+.pick-card.on .ccard{outline-color:var(--accent)}
+.pick-card .ccard .cname{font-size:.98rem}
+.pick-card .tick{position:absolute; right:10px; bottom:10px; width:26px; height:26px; border-radius:50%; background:var(--accent); color:var(--accent-ink); display:grid; place-items:center; z-index:2; opacity:0; transition:opacity .15s}
+.pick-card.on .tick{opacity:1}
+@media (max-width:380px){ .pick-cards{grid-template-columns:1fr} }
+
+/* toggles + rows */
+.toggle{display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; margin-inline:-20px; padding-inline:20px}
+.toggle::-webkit-scrollbar{display:none}
+.tg{flex:none; display:inline-flex; align-items:center; gap:8px; border:1px solid var(--line-2); background:var(--surface); border-radius:var(--r-pill); padding:6px 14px 6px 7px; font-weight:500; font-size:.92rem}
+.tg.on{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+.item{display:flex; align-items:center; gap:0; border:0; border-top:1px solid var(--line); background:transparent; width:100%; text-align:left; padding:0}
+.list > .item:first-child{border-top:0}
+.item.pad{padding:13px 16px; gap:12px}
+.item-title{display:block; font-weight:500}
+.item-sub{display:block; font-size:.86rem; color:var(--muted); margin-top:1px}
+.check-btn{border:0; background:transparent; padding:12px 10px 12px 16px; display:grid; place-items:center}
+.item-main{flex:1; min-width:0; display:flex; align-items:center; gap:10px; border:0; background:transparent; text-align:left; padding:13px 16px 13px 2px}
+.check{width:24px; height:24px; border-radius:50%; border:1.5px solid var(--line-2); display:grid; place-items:center; background:transparent}
+.check-btn:hover .check{border-color:var(--accent)}
+.check.on{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.check.on svg{width:13px; height:13px}
+.check.part{border-color:var(--accent); background:conic-gradient(var(--accent) var(--p), transparent 0)}
+.check.na{border-style:dashed}
+.dot{width:10px; height:10px; border-radius:50%; flex:none}
+
+/* benefits */
+.facts{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.fact{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:12px 14px; display:flex; flex-direction:column; gap:3px; min-width:0}
+.fact span{font-size:.78rem; color:var(--muted); font-weight:500}
+.fact b{font-size:1.15rem; font-weight:600; letter-spacing:-.02em}
+.fact b.accent{color:var(--accent-text)}
+.earn{display:flex; gap:12px; align-items:baseline; padding:11px 0; border-top:1px solid var(--line)}
+.earn:first-child{border-top:0}
+.earn .x{font-weight:600; font-size:1.05rem; min-width:2.8rem; color:var(--accent-text)}
+.perk{display:flex; gap:10px; padding:11px 0; border-top:1px solid var(--line)}
+.perk:first-child{border-top:0}
+.perk-d{border-top:1px solid var(--line)}
+.perk-d:first-child{border-top:0}
+.perk-d > summary{display:flex; align-items:center; gap:10px; padding:13px 0}
+.perk-d > summary b{font-weight:500}
+.perk-d .chev{color:var(--muted)}
+.perk-body{padding:0 0 14px}
+.perk-body p{margin:0 0 6px; color:var(--muted); font-size:.94rem}
+.bonus{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:16px; display:flex; flex-direction:column; gap:10px}
+.card-row{background:var(--surface); border:1px solid var(--line) !important; border-radius:var(--r-md)}
+.card-row input{width:20px; height:20px; accent-color:var(--accent)}
+
+/* explore */
+.rec{background:var(--surface); border:1px solid var(--line); border-radius:24px; padding:18px; display:flex; flex-direction:column; gap:14px; box-shadow:var(--shadow)}
+.rec-art{width:min(100%, 280px)}
+.rec .fact{background:var(--bg)}
+
+/* forms */
+.seg{display:grid; grid-template-columns:repeat(4,1fr); background:var(--surface-2); border-radius:12px; padding:3px; gap:3px}
+.seg button{border:0; background:transparent; border-radius:9px; padding:9px 4px; font-weight:500; font-size:.9rem; color:var(--muted)}
+.seg button.on{background:var(--surface); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.field{display:flex; flex-direction:column; gap:6px}
+.field label{font-weight:500; font-size:.9rem}
+.input{border:1px solid var(--line-2); background:var(--surface); border-radius:12px; padding:11px 14px; width:100%; min-width:0}
+.input:focus{border-color:var(--accent); outline:none; box-shadow:0 0 0 3px var(--accent-soft)}
+.money{display:flex; align-items:center; gap:6px; border:1px solid var(--line-2); background:var(--surface); border-radius:12px; padding:0 14px}
+.money:focus-within{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.money input{border:0; background:transparent; outline:none; padding:11px 0; width:100%; min-width:0}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+@media (max-width:420px){ .grid2{grid-template-columns:1fr} }
+textarea.input{min-height:140px; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:.8rem}
+
+/* tab bar */
+.tabbar{position:fixed; left:0; right:0; bottom:0; z-index:20; background:color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabbar nav{max-width:34rem; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr)}
+.tab{border:0; background:transparent; display:flex; flex-direction:column; align-items:center; gap:2px; padding:9px 0 11px; font-size:.72rem; font-weight:500; color:var(--muted)}
+.tab svg{width:22px; height:22px}
+.tab.on{color:var(--accent-text)}
+.tab-ic{display:grid; place-items:center; padding:2px}
+
+/* sheet */
+.scrim{position:fixed; inset:0; background:rgba(18,18,15,.4); z-index:40; display:flex; align-items:flex-end; justify-content:center; animation:fadein .15s}
+.sheet{background:var(--bg); width:100%; max-width:34rem; max-height:92%; overflow-y:auto; border-radius:22px 22px 0 0; padding:8px 20px calc(24px + env(safe-area-inset-bottom,0px)); animation:up .22s ease-out}
+.grab{width:36px; height:4px; border-radius:4px; background:var(--line-2); margin:4px auto 14px}
+@media (min-width:700px){ .scrim{align-items:center} .sheet{border-radius:22px; max-height:88%} }
+.toast{position:fixed; left:50%; bottom:calc(84px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); background:var(--ink); color:var(--bg); padding:10px 16px; border-radius:12px; font-weight:500; font-size:.92rem; z-index:60; box-shadow:var(--shadow); max-width:calc(100% - 32px); animation:fadein .15s}
+/* ---- v6 */
+.launch{display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; padding-block:18px 6px}
+.launch-mark{width:84px; height:84px; border-radius:22px; background:var(--brand); color:#fff; display:grid; place-items:center}
+.launch-name{font-size:2rem; font-weight:700; letter-spacing:-.04em; color:var(--brand-text); line-height:1}
+/* ---- v5 additions */
+.c-bofa{background:#9E2A2F} .c-bofa2{background:#6E2026} .c-bofa3{background:#3B4F6B} .c-bofa4{background:#20324A} .c-bofa5{background:#1B1F2A}
+.alt-box{display:flex; gap:12px; align-items:flex-start; background:var(--bg); border:1px solid var(--line); border-radius:var(--r-md); padding:12px 14px}
+.alt-box .mini{margin-top:4px}
+.good-know{display:flex; flex-direction:column; gap:6px}
+.choice-row{display:flex; flex-direction:column; align-items:stretch; gap:10px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:12px 14px}
+.choice-row select{padding:8px 10px}
+/* ---- v4 additions */
+.c-csp{background:#2B4C7E} .c-cfu{background:#3F6F9B} .c-flex{background:#4A5663} .c-prime{background:#1F3F55}
+.c-vx{background:#24282E} .c-venture{background:#3E4A5C} .c-savor{background:#4E3A63} .c-qs{background:#9A9C9F; color:#1E1F1C}
+.c-apple{background:#ECEBE7; color:#1E1F1C; box-shadow:inset 0 0 0 1px rgba(0,0,0,.08), 0 12px 26px -16px rgba(0,0,0,.4)} .c-rh{background:#C9A84A; color:#1E1A0C}
+.c-costco{background:#24508C} .c-dc{background:#2D3E50} .c-ac{background:#7A3434} .c-disc{background:#B66A2C} .c-green{background:#3D6A4E}
+.c-qs .chipart,.c-apple .chipart,.c-rh .chipart{background:rgba(0,0,0,.1); border-color:rgba(0,0,0,.14)}
+.mini.c-qs::after,.mini.c-apple::after,.mini.c-rh::after{background:rgba(0,0,0,.16)}
+.mini.c-apple{box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.pick-row .check{flex:none}
+.pick-row.on{background:var(--accent-soft)}
+.pill.due-pill{background:var(--bad-soft); color:var(--bad)}
+.sec-row{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
+.sec-tot{font-size:.85rem; font-weight:600; color:var(--muted)}
+.summary{display:flex; flex-direction:column; gap:6px}
+.fact span + span{font-size:.75rem}
+.beta-btn{position:fixed; left:16px; bottom:calc(76px + env(safe-area-inset-bottom,0px)); z-index:25; border:1px solid var(--line-2); background:var(--surface); color:var(--muted); font-size:.75rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:6px 11px; border-radius:var(--r-pill); box-shadow:var(--shadow)}
+.beta-btn:hover{color:var(--ink); border-color:var(--muted)}
+body.no-tabs .beta-btn{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+@keyframes fadein{from{opacity:0}}
+@keyframes up{from{transform:translateY(24px); opacity:.5} to{transform:none; opacity:1}}
+@media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important} }
+</style>
+<style>
+/* base reset (was provided by the artifact host) */
+:root{padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0} img{max-width:100%} [hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+
+<div id="app" class="wrap" aria-live="polite"></div>
+<div class="tabbar" id="tabbar" hidden></div>
+<button class="beta-btn" id="beta-btn" data-act="beta" aria-label="Beta tools">Beta</button>
+<div id="sheet-root"></div>
+<div id="toast-root"></div>
+
+<script>
+/* =========================================================================
+   vault — a credit card benefits companion
+   Sections: 1 CATALOG (card + benefit database)   2 STORE (local persistence)
+             3 PERIODS (reset math)                 4 ASSISTANT (deterministic Q&A)
+             5 VIEWS                                6 ACTIONS
+   ========================================================================= */
+
+/* ---------- 1. CATALOG ---------------------------------------------------
+   Verified against issuer pages on 2026-10-10 unless `verified:false`.
+   To add a card: push one object to CARDS and its credits to BENEFITS.      */
+const VERIFIED = "2026-10-10";
+const SRC = {
+  plat: "https://www.americanexpress.com/us/credit-cards/card/platinum/",
+  gold: "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
+  csr:  "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+  bilt: "https://bilt.com/card/palladium",
+  biltGuide: "https://www.biltrewards.com/terms/palladium-card-guide-to-benefits",
+};
+
+const CARDS = [
+  { id:"amex-gold", name:"Amex Gold", fullName:"American Express® Gold Card", issuer:"American Express", network:"Amex", program:"MR", programName:"Membership Rewards", annualFee:325, art:"c-gold", color:"#B9832B", source:SRC.gold,
+    aliases:["gold","amex gold","american express gold"],
+    earn:[
+      {cat:"dining", mult:4, how:"any", text:"at restaurants worldwide", cap:"on up to $50,000 a year, then 1x"},
+      {cat:"groceries", mult:4, how:"any", text:"at U.S. supermarkets", cap:"on up to $25,000 a year, then 1x"},
+      {cat:"hotels", mult:5, how:"portal", text:"on prepaid hotels booked on AmexTravel.com"},
+      {cat:"flights", mult:3, how:"any", text:"on flights booked directly with airlines or on AmexTravel.com"},
+      {cat:"car_rental", mult:2, how:"portal", text:"on prepaid car rentals booked on AmexTravel.com"},
+    ], base:1,
+    rental:{level:"secondary", text:"Car Rental Loss and Damage Insurance is secondary and has no liability coverage. Reserve and pay for the whole rental with the card and decline the counter CDW. Not available in Australia, Italy or New Zealand."},
+    perks:[
+      {name:"The Hotel Collection", text:"$100 property credit on eligible charges when you book 2+ nights through AmexTravel.com."},
+      {name:"Hertz Five Star® status", text:"Complimentary upgrade. Enrollment required."},
+      {name:"Trip Delay Insurance", text:"Up to $300 per trip when a covered delay exceeds 12 hours; max 2 claims per 12 months."},
+      {name:"Baggage Insurance", text:"Up to $1,250 carry-on and $500 checked, in excess of the carrier's coverage."},
+      {name:"Purchase protection & extended warranty", text:"90-day damage/theft coverage; up to 1 extra year on warranties of 5 years or less."},
+      {name:"No foreign transaction fees", text:""},
+    ]},
+  { id:"amex-plat", name:"Amex Platinum", fullName:"The Platinum Card® from American Express", issuer:"American Express", network:"Amex", program:"MR", programName:"Membership Rewards", annualFee:895, art:"c-plat", color:"#8F918E", source:SRC.plat,
+    aliases:["platinum","plat","amex plat","amex platinum"],
+    earn:[
+      {cat:"flights", mult:5, how:"any", text:"on flights booked directly with airlines or on AmexTravel.com", cap:"on up to $500,000 a year"},
+      {cat:"hotels", mult:5, how:"portal", text:"on prepaid hotels booked on AmexTravel.com"},
+    ], base:1,
+    rental:{level:"secondary", text:"Car Rental Loss and Damage Insurance is secondary and has no liability coverage. Pay for the whole rental with the card and decline the counter CDW. Not available in Australia, Italy or New Zealand."},
+    perks:[
+      {name:"Global Lounge Collection", text:"Centurion Lounges, 10 Delta Sky Club visits on eligible Delta flights, Priority Pass (enrollment required) and partner lounges."},
+      {name:"Fine Hotels + Resorts", text:"Breakfast for two, upgrade when available, ~$100 property credit, 4pm checkout."},
+      {name:"Hotel status", text:"Marriott Bonvoy Gold, Hilton Honors Gold (enroll), Leaders Club Sterling (enroll)."},
+      {name:"Car rental status", text:"Avis, Hertz and National programs. Enroll in your Amex account."},
+      {name:"Global Entry or TSA PreCheck credit", text:"$120 Global Entry every 4 years, or up to $85 for TSA PreCheck."},
+      {name:"Trip insurance", text:"Trip delay up to $500 after 6+ hours (2 claims/12 mo). Trip cancellation & interruption up to $10,000 per trip."},
+      {name:"Cell Phone Protection", text:"Up to $800 per claim, 2 claims per 12 months, $50 deductible."},
+      {name:"Return & purchase protection", text:"Returns up to $300/item within 90 days; purchase protection up to $10,000/item."},
+      {name:"No foreign transaction fees", text:""},
+    ]},
+  { id:"csr", name:"Sapphire Reserve", fullName:"Chase Sapphire Reserve®", issuer:"Chase", network:"Visa", program:"UR", programName:"Ultimate Rewards", annualFee:795, art:"c-csr", color:"#1F2B47", source:SRC.csr,
+    aliases:["sapphire","reserve","csr","sapphire reserve","chase"],
+    earn:[
+      {cat:"portal", mult:8, how:"portal", text:"on all purchases through Chase Travel (including The Edit)"},
+      {cat:"flights", mult:4, how:"direct", text:"on flights booked directly with the airline"},
+      {cat:"hotels", mult:4, how:"direct", text:"on hotels booked directly with the hotel"},
+      {cat:"dining", mult:3, how:"any", text:"on dining worldwide, including takeout and eligible delivery"},
+      {cat:"lyft", mult:5, how:"any", text:"on Lyft rides", until:"2027-09-30"},
+    ], base:1,
+    travelCreditNote:"Purchases covered by the $300 travel credit or The Edit credit don't earn points.",
+    rental:{level:"primary", text:"Auto Rental Coverage is primary, up to $75,000 for theft and collision on most rental cars in the U.S. and abroad. Decline the rental company's collision insurance and charge the entire rental to the card. New York residents: secondary inside the U.S."},
+    perks:[
+      {name:"Lounges", text:"Chase Sapphire Lounges and 1,300+ Priority Pass lounges, each with up to 2 guests."},
+      {name:"IHG One Rewards Platinum Elite", text:"Complimentary through Dec 31, 2027. Link your IHG account in Chase."},
+      {name:"Apple TV & Apple Music", text:"At least 12 months free when activated by June 22, 2027."},
+      {name:"DashPass", text:"Complimentary DashPass when activated by Dec 31, 2029."},
+      {name:"Global Entry, TSA PreCheck or NEXUS", text:"One credit up to $120 every 4 years."},
+      {name:"Trip protections", text:"Trip cancellation up to $10,000/person; trip delay up to $500 after 6+ hours; lost luggage up to $3,000; baggage delay $100/day for 5 days."},
+      {name:"Purchase protections", text:"120-day purchase protection up to $10,000/item; return protection up to $500/item; extended warranty +1 year."},
+      {name:"$75,000 spend benefits", text:"Spend $75k in a calendar year to unlock Hyatt Explorist, IHG Diamond, a $250 Shops at Chase credit and a $500 Southwest credit."},
+    ]},
+  { id:"bilt-palladium", name:"Bilt Palladium", fullName:"Bilt Palladium Card", issuer:"Bilt", network:"Mastercard", program:"BILT", programName:"Bilt Points", annualFee:495, art:"c-bilt", color:"#38383C", source:SRC.bilt,
+    aliases:["bilt","palladium","bilt palladium"],
+    earn:[
+      {cat:"dining", mult:5, how:"partner", text:"at Bilt partner restaurants (up to 5x)"},
+      {cat:"hotels", mult:4, how:"portal", text:"on hotels booked through Bilt Travel"},
+      {cat:"flights", mult:3, how:"portal", text:"on flights booked through Bilt Travel"},
+      {cat:"lyft", mult:4, how:"any", text:"on Lyft after linking your Lyft and Bilt accounts"},
+      {cat:"rent", mult:1.25, how:"any", text:"on rent and mortgage, no transaction fee", cap:"rate depends on how much you spend on everyday purchases (0.5x–1.25x)"},
+    ], base:2, baseText:"on everyday purchases and other travel",
+    rental:{level:"unknown", text:"Bilt lists MasterRental Coverage, but the card page doesn't state whether it's primary or secondary, or its limits. Check the Guide to Benefits before relying on it.", source:SRC.biltGuide},
+    perks:[
+      {name:"Priority Pass", text:"Membership for you and up to two guests. Authorized users get their own."},
+      {name:"Housing rewards", text:"Earn on rent and mortgage with no transaction fee. You can hold only one Bilt card at a time."},
+      {name:"Point Accelerator", text:"Spend $200 Bilt Cash for an extra 1x on up to $5,000 of spend, up to 5 times a year."},
+      {name:"Mastercard protections", text:"MasterRental, cell phone protection and travel protections. Limits are in the Guide to Benefits."},
+      {name:"No foreign transaction fees", text:""},
+    ]},
+];
+
+/* Benefit records. value = per period. frequency: monthly | quarterly | semiannual | annual.
+   cycle: calendar | anniversary. type: statement | merchant | membership | points | promo. */
+const BENEFITS = [
+  // ---- Amex Platinum
+  { id:"plat-hotel", cardId:"amex-plat", name:"Hotel credit", merchant:"Fine Hotels + Resorts / The Hotel Collection", value:300, frequency:"semiannual", cycle:"calendar", type:"statement",
+    description:"Up to $300 back each half-year on prepaid FHR or The Hotel Collection bookings through Amex Travel.",
+    merchants:["Fine Hotels + Resorts (prepaid, Amex Travel)","The Hotel Collection (prepaid, Amex Travel, 2-night minimum)"],
+    enrollment:false, activation:"Book a prepaid stay on AmexTravel.com with the Platinum Card.", terms:"Prepaid bookings only. The Hotel Collection requires a two-night minimum.", keywords:["hotel","fhr","fine hotels","hotel collection"], sourceUrl:SRC.plat },
+  { id:"plat-resy", cardId:"amex-plat", name:"Resy credit", merchant:"Resy restaurants", value:100, frequency:"quarterly", cycle:"calendar", type:"merchant",
+    description:"Up to $100 back each quarter at qualifying U.S. Resy restaurants and other eligible Resy purchases.",
+    merchants:["10,000+ qualifying U.S. Resy restaurants"], enrollment:true, activation:"Enroll in your Amex account, then pay at a qualifying Resy restaurant with the Platinum Card.",
+    terms:"Enrollment required. News reports say that from Aug 1, 2026 only restaurants marked eligible on Resy qualify; check the Resy listing before you go.", keywords:["resy","restaurant"], sourceUrl:SRC.plat },
+  { id:"plat-digital", cardId:"amex-plat", name:"Digital entertainment", merchant:"Streaming & news", value:25, frequency:"monthly", cycle:"calendar", type:"merchant",
+    description:"Up to $25 back each month on eligible subscriptions.",
+    merchants:["Disney+ and bundles","ESPN streaming","Hulu","The New York Times","Paramount+","Peacock","The Wall Street Journal","YouTube Premium","YouTube TV"],
+    enrollment:true, activation:"Enroll, then pay the subscription with the Platinum Card.", terms:"Enrollment required. Participating partners only.", keywords:["disney","hulu","espn","new york times","nyt","paramount","peacock","wall street journal","wsj","youtube","streaming"], sourceUrl:SRC.plat },
+  { id:"plat-lulu", cardId:"amex-plat", name:"lululemon credit", merchant:"lululemon", value:75, frequency:"quarterly", cycle:"calendar", type:"merchant",
+    description:"Up to $75 back each quarter at U.S. lululemon stores and lululemon.com.",
+    merchants:["U.S. lululemon retail stores (not outlets)","lululemon.com"], enrollment:true, activation:"Enroll, then shop with the Platinum Card.", terms:"Outlets excluded. Enrollment required.", keywords:["lululemon","lulu"], sourceUrl:SRC.plat },
+  { id:"plat-uber", cardId:"amex-plat", name:"Uber Cash", merchant:"Uber rides & Uber Eats", value:15, decemberValue:35, frequency:"monthly", cycle:"calendar", type:"merchant",
+    description:"$15 in Uber Cash each month, plus a $20 bonus in December ($200 a year).",
+    merchants:["Uber rides in the U.S.","Uber Eats in the U.S."], enrollment:false, activation:"Add the Platinum Card to your Uber account and select an Amex Card at checkout.", terms:"U.S. only. Uber Cash doesn't roll over to the next month.", keywords:["uber","uber eats"], sourceUrl:SRC.plat },
+  { id:"plat-uberone", cardId:"amex-plat", name:"Uber One credit", merchant:"Uber One membership", value:120, frequency:"annual", cycle:"calendar", type:"membership",
+    description:"Up to $120 back per calendar year on an auto-renewing Uber One membership.",
+    merchants:["Uber One (auto-renewing)"], enrollment:false, activation:"Pay for Uber One with the Platinum Card.", terms:"Membership must auto-renew.", keywords:["uber one"], sourceUrl:SRC.plat },
+  { id:"plat-airline", cardId:"amex-plat", name:"Airline fee credit", merchant:"Your selected airline", value:200, frequency:"annual", cycle:"calendar", type:"statement",
+    description:"Up to $200 back per calendar year on incidental fees from one airline you select.",
+    merchants:["Checked bags, in-flight refreshments, change fees, lounge day passes, pet fees, phone reservation fees"], enrollment:true, activation:"Select one qualifying airline in your Amex account.", terms:"Incidental fees only, not airfare. Credits can take up to 8 weeks.", keywords:["airline fee","bag fee","checked bag","incidental"], sourceUrl:SRC.plat },
+  { id:"plat-clear", cardId:"amex-plat", name:"CLEAR+ credit", merchant:"CLEAR+", value:219, frequency:"annual", cycle:"calendar", type:"membership",
+    description:"Up to $219 back per calendar year on a CLEAR+ membership.", merchants:["CLEAR+ (auto-renewing)"], enrollment:false, activation:"Pay for CLEAR+ with the Platinum Card.", terms:"Excludes taxes and fees.", keywords:["clear"], sourceUrl:SRC.plat },
+  { id:"plat-walmart", cardId:"amex-plat", name:"Walmart+ credit", merchant:"Walmart+", value:12.95, frequency:"monthly", cycle:"calendar", type:"membership",
+    description:"Up to $12.95 (plus tax) back each month on a monthly Walmart+ membership.", merchants:["Walmart+ monthly membership"], enrollment:false, activation:"Pay for monthly Walmart+ with the Platinum Card.", terms:"Monthly plan only, one membership fee.", keywords:["walmart"], sourceUrl:SRC.plat },
+  { id:"plat-oura", cardId:"amex-plat", name:"Oura Ring credit", merchant:"Oura", value:200, frequency:"annual", cycle:"calendar", type:"merchant",
+    description:"Up to $200 back per calendar year on an Oura Ring bought at ouraring.com.", merchants:["ouraring.com"], enrollment:true, activation:"Enroll, then buy at ouraring.com.", terms:"Enrollment required.", keywords:["oura"], sourceUrl:SRC.plat },
+  { id:"plat-equinox", cardId:"amex-plat", name:"Equinox credit", merchant:"Equinox", value:300, frequency:"annual", cycle:"calendar", type:"membership",
+    description:"Up to $300 back per calendar year on an Equinox club membership or Equinox+.", merchants:["Equinox clubs","Equinox+"], enrollment:true, activation:"Enroll, then pay with the Platinum Card.", terms:"Auto-renewing membership. Enrollment required.", keywords:["equinox","gym"], sourceUrl:SRC.plat },
+
+  // ---- Amex Gold
+  { id:"gold-dining", cardId:"amex-gold", name:"Dining credit", merchant:"Grubhub, Five Guys & more", value:10, frequency:"monthly", cycle:"calendar", type:"merchant",
+    description:"Up to $10 back each month at select dining partners.", merchants:["Grubhub (incl. Seamless)","Buffalo Wild Wings","Five Guys","The Cheesecake Factory","Wonder"],
+    enrollment:true, activation:"Enroll, then pay with the Gold Card.", terms:"Enrollment required. Listed merchants only.", keywords:["grubhub","seamless","buffalo wild wings","five guys","cheesecake","wonder"], sourceUrl:SRC.gold },
+  { id:"gold-uber", cardId:"amex-gold", name:"Uber Cash", merchant:"Uber rides & Uber Eats", value:10, frequency:"monthly", cycle:"calendar", type:"merchant",
+    description:"$10 in Uber Cash each month.", merchants:["Uber rides in the U.S.","Uber Eats in the U.S."], enrollment:false, activation:"Add the Gold Card to your Uber account and select an Amex Card at checkout.", terms:"U.S. only. Doesn't roll over.", keywords:["uber","uber eats"], sourceUrl:SRC.gold },
+  { id:"gold-resy", cardId:"amex-gold", name:"Resy credit", merchant:"Resy restaurants", value:50, frequency:"semiannual", cycle:"calendar", type:"merchant",
+    description:"Up to $50 back January–June and again July–December at qualifying U.S. Resy restaurants.", merchants:["10,000+ qualifying U.S. Resy restaurants"],
+    enrollment:true, activation:"Enroll, then pay at a qualifying Resy restaurant.", terms:"Enrollment required. News reports say that from Aug 1, 2026 only restaurants marked eligible on Resy qualify.", keywords:["resy","restaurant"], sourceUrl:SRC.gold },
+  { id:"gold-dunkin", cardId:"amex-gold", name:"Dunkin' credit", merchant:"Dunkin'", value:7, frequency:"monthly", cycle:"calendar", type:"merchant",
+    description:"Up to $7 back each month at U.S. Dunkin' locations.", merchants:["U.S. Dunkin' locations"], enrollment:true, activation:"Enroll, then pay with the Gold Card.", terms:"Enrollment required.", keywords:["dunkin","donut","coffee"], sourceUrl:SRC.gold },
+
+  // ---- Chase Sapphire Reserve
+  { id:"csr-travel", cardId:"csr", name:"Travel credit", merchant:"Almost any travel", value:300, frequency:"annual", cycle:"anniversary", type:"statement",
+    description:"Up to $300 back on travel purchases each account anniversary year. Applied automatically.",
+    merchants:["Airlines, hotels, car rentals, cruises, travel agencies, trains, buses, taxis, ferries, tolls, parking"], enrollment:false, activation:"Automatic on the first travel purchases each card year.",
+    terms:"Resets with your account anniversary (through the first statement after it), not January 1. Purchases it covers don't earn points.", keywords:["travel credit"], sourceUrl:SRC.csr },
+  { id:"csr-edit", cardId:"csr", name:"The Edit credit", merchant:"The Edit by Chase Travel", value:500, frequency:"annual", cycle:"calendar", type:"statement",
+    description:"Up to $250 back per prepaid booking, up to $500 per calendar year.", merchants:["The Edit hotels via Chase Travel ('Pay Now', 2+ nights)"], enrollment:false, activation:"Automatic on qualifying prepaid bookings.",
+    terms:"2-night minimum, prepaid only. Starting 2026, both $250 credits can be used any time in the calendar year. Covered purchases don't earn points.", keywords:["the edit","edit","hotel"], sourceUrl:SRC.csr },
+  { id:"csr-dining", cardId:"csr", name:"Exclusive Tables dining", merchant:"Sapphire Reserve Exclusive Tables", value:150, frequency:"semiannual", cycle:"calendar", type:"merchant",
+    description:"Up to $150 back January–June and again July–December at Sapphire Reserve Exclusive Tables restaurants.", merchants:["Participating restaurants on OpenTable"], enrollment:false, activation:"Automatic. Find restaurants at opentable.com/sapphire-reserve-exclusive-tables.",
+    terms:"Must be paid directly to the restaurant. Third-party payment and delivery platforms don't count.", keywords:["opentable","exclusive tables","restaurant"], sourceUrl:SRC.csr },
+  { id:"csr-stubhub", cardId:"csr", name:"StubHub credit", merchant:"StubHub & viagogo", value:150, frequency:"semiannual", cycle:"calendar", type:"merchant", endsOn:"2027-12-31",
+    description:"Up to $150 back January–June and again July–December on StubHub and viagogo.", merchants:["stubhub.com / StubHub app","viagogo.com / viagogo app"], enrollment:true, activation:"One-time activation in Chase, then buy with the card.",
+    terms:"Through Dec 31, 2027. Gift cards and stubhub.co.uk excluded.", keywords:["stubhub","viagogo","tickets","concert"], sourceUrl:SRC.csr },
+  { id:"csr-lyft", cardId:"csr", name:"Lyft credit", merchant:"Lyft", value:10, frequency:"monthly", cycle:"calendar", type:"promo", endsOn:"2027-09-30",
+    description:"A $10 in-app Lyft credit each month.", merchants:["Lyft rides (Standard, Extra Comfort, XL, Black)"], enrollment:false, activation:"Add the card to the Lyft app.",
+    terms:"Through Sep 30, 2027. Excludes memberships, tips and fees. Unused credit is forfeited each month.", keywords:["lyft","rideshare"], sourceUrl:SRC.csr },
+  { id:"csr-peloton", cardId:"csr", name:"Peloton credit", merchant:"Peloton membership", value:10, frequency:"monthly", cycle:"calendar", type:"membership", endsOn:"2027-12-31",
+    description:"Up to $10 back each month on an eligible Peloton membership.", merchants:["Peloton All-Access, App+, App One, Strength+, Guide, Rental"], enrollment:true, activation:"Activate in Chase and sign up via onepeloton.com/digital/promotions/chase.",
+    terms:"Through Dec 31, 2027. App-store purchases don't qualify.", keywords:["peloton"], sourceUrl:SRC.csr },
+  { id:"csr-dd-15", cardId:"csr", name:"DoorDash $15 promo", merchant:"DoorDash", value:15, frequency:"monthly", cycle:"calendar", type:"promo", endsOn:"2029-12-31",
+    description:"$15 off one qualifying DoorDash order each month.", merchants:["DoorDash"], enrollment:true, activation:"Activate complimentary DashPass with the card, then pick the promo at checkout.",
+    terms:"One order per month, subtotal only. Unused value is forfeited.", keywords:["doordash","delivery"], sourceUrl:SRC.csr },
+  { id:"csr-dd-20", cardId:"csr", name:"DoorDash non-restaurant promos", merchant:"DoorDash grocery & retail", value:20, frequency:"monthly", cycle:"calendar", type:"promo", endsOn:"2029-12-31",
+    description:"Two $10-off promos each month on non-restaurant DoorDash orders (grocery, essentials).", merchants:["DoorDash grocery, retail and convenience"], enrollment:true, activation:"Activate DashPass with the card. Each $10 promo needs a separate order.",
+    terms:"Subtotal only. Unused value is forfeited.", keywords:["doordash","grocery delivery"], sourceUrl:SRC.csr },
+  { id:"csr-select-hotels", cardId:"csr", name:"Select hotels credit (2026)", merchant:"Select Chase Travel hotels", value:250, frequency:"annual", cycle:"calendar", type:"statement", endsOn:"2026-12-31",
+    description:"A one-time 2026 credit toward select hotel brands booked through Chase Travel.", merchants:["IHG, Montage, Pendry, Omni, Virgin, Minor, Pan Pacific (via Chase Travel)"], enrollment:false, activation:"Book a qualifying property through Chase Travel.",
+    terms:"Reported by rewards blogs. It isn't on the current Chase product page, so confirm in your Chase account before counting on it.", keywords:["ihg","hotel"], verified:false, sourceUrl:"https://frequentmiler.com/chase-sapphire-reserve-new-150k-welcome-offer/" },
+
+  // ---- Bilt Palladium
+  { id:"bilt-hotel", cardId:"bilt-palladium", name:"Bilt Travel hotel credit", merchant:"Bilt Travel hotels", value:200, frequency:"semiannual", cycle:"calendar", type:"statement",
+    description:"$200 back January–June and again July–December on Bilt Travel hotel bookings.", merchants:["Hotels booked on the Bilt Travel portal (2+ nights)"], enrollment:false, activation:"Book a 2-night or longer stay in Bilt Travel.",
+    terms:"Credits don't roll over between halves.", keywords:["bilt travel","hotel"], sourceUrl:SRC.bilt },
+  { id:"bilt-cash", cardId:"bilt-palladium", name:"Annual Bilt Cash", merchant:"Bilt Cash", value:200, frequency:"annual", cycle:"calendar", type:"points",
+    description:"$200 in Bilt Cash deposited each January 1.", merchants:["Housing point unlocks, Lyft, Bilt Travel hotels, fitness classes, Grubhub, Walgreens"], enrollment:false, activation:"Deposited automatically.",
+    terms:"Bilt Cash expires Dec 31; up to $100 of the balance rolls into the next year.", keywords:["bilt cash"], sourceUrl:SRC.bilt },
+];
+
+/* ---- Cards added 2026-10-11 (issuer pages unless noted) ---- */
+const SRC2 = {
+  csp:"https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+  cfu:"https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
+  flex:"https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
+  prime:"https://creditcards.chase.com/cash-back-credit-cards/amazon-prime-rewards",
+  vx:"https://www.capitalone.com/credit-cards/venture-x/",
+  venture:"https://www.capitalone.com/credit-cards/venture/",
+  savor:"https://www.capitalone.com/credit-cards/savor/",
+  qs:"https://www.capitalone.com/credit-cards/quicksilver/",
+  apple:"https://www.apple.com/apple-card/",
+  rh:"https://robinhood.com/creditcard",
+  costco:"https://www.citi.com/credit-cards/citi-costco-anywhere-visa-credit-card",
+  dc:"https://www.citi.com/credit-cards/citi-double-cash-credit-card",
+  ac:"https://creditcards.wellsfargo.com/active-cash-credit-card/",
+  green:"https://www.americanexpress.com/us/credit-cards/card/green/",
+  discover:"https://www.discover.com/credit-cards/cash-back/it-card.html",
+};
+const NO_RENTAL = { level:"none", text:"This card doesn't list rental car coverage." };
+CARDS.push(
+  { id:"csp", name:"Sapphire Preferred", fullName:"Chase Sapphire Preferred® Card", issuer:"Chase", network:"Visa", program:"UR", programName:"Ultimate Rewards", annualFee:95, art:"c-csp", color:"#2B4C7E", source:SRC2.csp,
+    aliases:["sapphire preferred","csp","preferred","chase sapphire preferred"],
+    earn:[
+      {cat:"portal", mult:5, how:"portal", text:"on travel booked through Chase Travel"},
+      {cat:"dining", mult:3, how:"any", text:"on dining, including takeout and delivery"},
+      {cat:"gas", mult:3, how:"any", text:"at gas stations and EV charging"},
+      {cat:"groceries", mult:3, how:"any", text:"on online groceries (not Target, Walmart or warehouse clubs)"},
+      {cat:"streaming", mult:3, how:"any", text:"on top streaming services"},
+      {cat:"flights", mult:2, how:"any", text:"on travel"}, {cat:"hotels", mult:2, how:"any", text:"on travel"}, {cat:"car_rental", mult:2, how:"any", text:"on travel"},
+      {cat:"transit", mult:2, how:"any", text:"on travel"},
+      {cat:"lyft", mult:5, how:"any", text:"on Lyft rides", until:"2027-09-30"},
+    ], base:1,
+    rental:{ level:"primary", text:"Primary coverage up to $60,000 for theft and collision on most rental cars. Decline the counter's collision coverage and pay with the card. New York residents: secondary in the U.S." },
+    perks:[
+      {name:"Trip protections", text:"If your trip is canceled, delayed 12+ hours or your bag is lost, Chase can pay you back."},
+      {name:"Global Entry, TSA PreCheck or NEXUS", text:"The card pays your fee to get through airport lines faster, once every 4 years."},
+      {name:"DashPass", text:"A free year of DashPass when you turn it on by Dec 31, 2029."},
+      {name:"Apple TV", text:"A free year of Apple TV if you turn it on by Dec 31, 2026."},
+      {name:"Purchase protection", text:"New stuff is covered for 120 days if it breaks or gets stolen."},
+      {name:"No foreign transaction fees", text:"No extra fee when you buy things in another country."},
+    ]},
+  { id:"cfu", name:"Freedom Unlimited", fullName:"Chase Freedom Unlimited®", issuer:"Chase", network:"Visa", program:"UR", programName:"Chase cash back", cash:true, annualFee:0, art:"c-cfu", color:"#3F6F9B", source:SRC2.cfu,
+    aliases:["freedom unlimited","cfu","chase freedom unlimited"],
+    earn:[
+      {cat:"portal", mult:5, how:"portal", text:"on travel booked through Chase Travel"},
+      {cat:"dining", mult:3, how:"any", text:"on dining, including takeout and delivery"},
+      {cat:"drugstore", mult:3, how:"any", text:"at drugstores"},
+      {cat:"lyft", mult:2, how:"any", text:"on Lyft rides", until:"2027-09-30"},
+    ], base:1.5, baseText:"on everything else",
+    rental:{ level:"secondary", text:"Covers theft and collision on most rental cars after your own insurance pays. Decline the counter's collision coverage and pay with the card." },
+    perks:[
+      {name:"Purchase protection", text:"New stuff is covered for 120 days if it breaks or gets stolen, up to $500 per item."},
+      {name:"Extended warranty", text:"Adds a year to warranties of 3 years or less."},
+      {name:"Trip cancellation", text:"If a prepaid trip is canceled for a covered reason, you can get up to $1,500 per person back."},
+      {name:"DashPass", text:"6 free months of DashPass if you turn it on by Dec 31, 2027."},
+    ]},
+  { id:"flex", name:"Freedom Flex", fullName:"Chase Freedom Flex®", issuer:"Chase", network:"Mastercard", program:"UR", programName:"Chase cash back", cash:true, annualFee:0, art:"c-flex", color:"#4A5663", source:SRC2.flex,
+    aliases:["freedom flex","flex","chase freedom flex","freedom"],
+    earn:[
+      {cat:"groceries", mult:5, how:"any", rotating:true, from:"2026-10-01", until:"2026-12-31", text:"at grocery stores in Oct–Dec 2026 (not Walmart or Target)", cap:"activate first; on up to $1,500 combined with dining"},
+      {cat:"dining", mult:5, how:"any", rotating:true, from:"2026-10-01", until:"2026-12-31", text:"on dining in Oct–Dec 2026", cap:"activate first; on up to $1,500 combined with groceries"},
+      {cat:"portal", mult:5, how:"portal", text:"on travel booked through Chase Travel"},
+      {cat:"dining", mult:3, how:"any", text:"on dining, including takeout and delivery"},
+      {cat:"drugstore", mult:3, how:"any", text:"at drugstores"},
+      {cat:"lyft", mult:2, how:"any", text:"on Lyft rides", until:"2027-09-30"},
+    ], base:1,
+    rental:{ level:"secondary", text:"Covers theft and collision on most rental cars after your own insurance pays. Decline the counter's collision coverage and pay with the card." },
+    perks:[
+      {name:"Rotating 5% categories", text:"Every 3 months, Chase picks new categories that earn 5% on up to $1,500. You have to turn them on each time."},
+      {name:"Purchase protection", text:"New stuff is covered for 120 days if it breaks or gets stolen, up to $500 per item."},
+      {name:"Trip cancellation", text:"If a prepaid trip is canceled for a covered reason, you can get up to $1,500 per person back."},
+      {name:"No foreign transaction fees", text:"No extra fee when you buy things in another country."},
+    ]},
+  { id:"prime-visa", name:"Prime Visa", fullName:"Prime Visa (Chase)", issuer:"Chase", network:"Visa", program:"AMZ", programName:"Amazon rewards", cash:true, annualFee:0, feeNote:"needs a Prime membership for 5%", art:"c-prime", color:"#1F3F55", source:SRC2.prime,
+    aliases:["prime visa","amazon card","amazon visa","amazon prime card","prime card","amazon"],
+    earn:[
+      {cat:"amazon", mult:5, how:"any", text:"at Amazon, Audible and Whole Foods (with Prime)", cap:"3% without Prime"},
+      {cat:"portal", mult:5, how:"portal", text:"on travel booked through Chase Travel (with Prime)"},
+      {cat:"dining", mult:2, how:"any", text:"at restaurants"},
+      {cat:"gas", mult:2, how:"any", text:"at gas stations"},
+      {cat:"transit", mult:2, how:"any", text:"on local transit and rideshare"},
+      {cat:"lyft", mult:2, how:"any", text:"on rideshare"},
+    ], base:1,
+    rental:{ level:"secondary", text:"Covers theft and collision on most rental cars after your own insurance pays. Decline the counter's collision coverage and pay with the card." },
+    perks:[
+      {name:"No annual fee", text:"You pay nothing for the card, but 5% back needs a Prime membership."},
+      {name:"Purchase protection", text:"New stuff is covered for 120 days if it breaks or gets stolen, up to $500 per item."},
+      {name:"Baggage & travel protection", text:"Help if your bag is delayed or lost on a trip you paid for with the card."},
+      {name:"No foreign transaction fees", text:"No extra fee when you buy things in another country."},
+    ]},
+  { id:"venture-x", name:"Venture X", fullName:"Capital One Venture X Rewards", issuer:"Capital One", network:"Visa", program:"C1", programName:"Capital One miles", annualFee:395, art:"c-vx", color:"#24282E", source:SRC2.vx,
+    aliases:["venture x","vx","capital one venture x"],
+    earn:[
+      {cat:"hotels", mult:10, how:"portal", text:"on hotels booked through Capital One Travel"},
+      {cat:"car_rental", mult:10, how:"portal", text:"on rental cars booked through Capital One Travel"},
+      {cat:"flights", mult:5, how:"portal", text:"on flights booked through Capital One Travel"},
+    ], base:2, baseText:"on everything else",
+    rental:{ level:"primary", text:"Primary collision damage coverage on most rentals (pickup trucks excluded). Pay with the card and decline the counter's collision coverage." },
+    perks:[
+      {name:"Airport lounges", text:"Capital One Lounges and Priority Pass. Since Feb 2026, guests cost $35 each."},
+      {name:"Global Entry or TSA PreCheck", text:"The card pays your fee to get through airport lines faster, once every 4 years."},
+      {name:"Hertz status", text:"Faster pickup and perks at Hertz. Turn it on once."},
+      {name:"Cell phone protection", text:"Pay your phone bill with this card and a broken or stolen phone is covered, up to $800."},
+      {name:"No foreign transaction fees", text:"No extra fee when you buy things in another country."},
+    ]},
+  { id:"venture", name:"Venture", fullName:"Capital One Venture Rewards", issuer:"Capital One", network:"Visa", program:"C1", programName:"Capital One miles", annualFee:95, art:"c-venture", color:"#3E4A5C", source:SRC2.venture,
+    aliases:["venture","capital one venture"],
+    earn:[
+      {cat:"hotels", mult:5, how:"portal", text:"on hotels and vacation rentals booked through Capital One Travel"},
+      {cat:"car_rental", mult:5, how:"portal", text:"on rental cars booked through Capital One Travel"},
+    ], base:2, baseText:"on everything else",
+    rental:{ level:"unknown", text:"Capital One lists an auto rental collision damage waiver but doesn't say on the card page whether it's primary or secondary." },
+    perks:[
+      {name:"Global Entry or TSA PreCheck", text:"The card pays your fee to get through airport lines faster, once every 4 years."},
+      {name:"Hertz Five Star status", text:"Faster pickup and perks at Hertz."},
+      {name:"Transfer partners", text:"Move your miles to airline and hotel programs for more value."},
+      {name:"No foreign transaction fees", text:"No extra fee when you buy things in another country."},
+    ]},
+  { id:"savor", name:"Savor", fullName:"Capital One Savor Cash Rewards", issuer:"Capital One", network:"Mastercard", program:"C1", programName:"Capital One cash back", cash:true, annualFee:0, art:"c-savor", color:"#4E3A63", source:SRC2.savor,
+    aliases:["savor","savorone","capital one savor"],
+    earn:[
+      {cat:"dining", mult:3, how:"any", text:"on dining"},
+      {cat:"groceries", mult:3, how:"any", text:"at grocery stores (not Walmart or Target)"},
+      {cat:"entertainment", mult:3, how:"any", text:"on entertainment"},
+      {cat:"streaming", mult:3, how:"any", text:"on popular streaming services"},
+      {cat:"hotels", mult:5, how:"portal", text:"on hotels booked through Capital One Travel"},
+      {cat:"car_rental", mult:5, how:"portal", text:"on rental cars booked through Capital One Travel"},
+    ], base:1,
+    rental:{ level:"unknown", text:"The card page doesn't list rental car coverage. Check your Guide to Benefits." },
+    perks:[
+      {name:"No annual fee", text:"You pay nothing to keep the card."},
+      {name:"No foreign transaction fees", text:"No extra fee when you buy things in another country."},
+    ]},
+  { id:"quicksilver", name:"Quicksilver", fullName:"Capital One Quicksilver Cash Rewards", issuer:"Capital One", network:"Mastercard", program:"C1", programName:"Capital One cash back", cash:true, annualFee:0, art:"c-qs", color:"#9A9C9F", source:SRC2.qs,
+    aliases:["quicksilver","capital one quicksilver"],
+    earn:[], base:1.5, baseText:"on everything",
+    rental:{ level:"unknown", text:"The card page doesn't list rental car coverage. Check your Guide to Benefits." },
+    perks:[
+      {name:"Simple flat rate", text:"Same cash back on everything, so there's nothing to track."},
+      {name:"No foreign transaction fees", text:"No extra fee when you buy things in another country."},
+    ]},
+  { id:"apple-card", baseEffective:1.8, name:"Apple Card", fullName:"Apple Card", issuer:"Goldman Sachs", network:"Mastercard", program:"APPLE", programName:"Daily Cash", cash:true, annualFee:0, art:"c-apple", color:"#E6E4DF", source:SRC2.apple,
+    aliases:["apple card","apple"],
+    earn:[
+      {cat:"apple", mult:3, how:"any", text:"at Apple"},
+      {cat:"gas", mult:3, how:"partner", text:"at Exxon Mobil with Apple Pay"},
+      {cat:"car_rental", mult:3, how:"partner", text:"at Hertz with Apple Pay"},
+      {cat:"lyft", mult:2, how:"any", text:"on rideshare with Apple Pay (3% on Uber)"},
+      {cat:"drugstore", mult:3, how:"partner", text:"at Walgreens and Duane Reade with Apple Pay"},
+    ], base:2, baseText:"with Apple Pay (1% with the physical card)",
+    rental:NO_RENTAL,
+    perks:[
+      {name:"No fees at all", text:"No annual, late or foreign transaction fees."},
+      {name:"Daily Cash", text:"Your cash back shows up every day, and you can save it in Apple's savings account."},
+      {name:"0% on Apple products", text:"Pay off a new iPhone or Mac in monthly payments with no interest."},
+    ]},
+  { id:"robinhood-gold", name:"Robinhood Gold", fullName:"Robinhood Gold Card", issuer:"Robinhood", network:"Visa", program:"RH", programName:"Robinhood cash back", cash:true, annualFee:50, feeNote:"Robinhood Gold membership", art:"c-rh", color:"#C9A84A", source:SRC2.rh,
+    aliases:["robinhood","robinhood gold","robinhood card"],
+    earn:[
+      {cat:"portal", mult:5, how:"portal", text:"on travel booked through Robinhood's travel site"},
+    ], base:3, baseText:"on everything else",
+    rental:{ level:"unknown", text:"Reviews list rental car insurance, but Robinhood's card page doesn't give details. Check the Visa benefits terms.", source:"https://www.nerdwallet.com/article/credit-cards/new-robinhood-credit-card-will-earn-3-back-on-most-purchases" },
+    perks:[
+      {name:"3% on everything", text:"The highest flat cash back here. You need Robinhood Gold, about $50 a year."},
+      {name:"Free authorized users", text:"Add family members at no cost."},
+      {name:"No foreign transaction fees", text:"No extra fee when you buy things in another country."},
+    ]},
+  { id:"costco-citi", name:"Costco Anywhere Visa", fullName:"Costco Anywhere Visa® Card by Citi", issuer:"Citi", network:"Visa", program:"COSTCO", programName:"Costco cash back", cash:true, annualFee:0, feeNote:"needs a Costco membership", art:"c-costco", color:"#24508C", source:SRC2.costco,
+    aliases:["costco","costco card","costco visa","costco citi"],
+    earn:[
+      {cat:"gas", mult:4, how:"any", text:"on gas and EV charging (5% at Costco gas)", cap:"on up to $7,000 a year, then 1%"},
+      {cat:"dining", mult:3, how:"any", text:"at restaurants"},
+      {cat:"flights", mult:3, how:"any", text:"on eligible travel"}, {cat:"hotels", mult:3, how:"any", text:"on eligible travel"}, {cat:"car_rental", mult:3, how:"any", text:"on eligible travel"},
+      {cat:"costco", mult:2, how:"any", text:"at Costco and Costco.com"},
+    ], base:1,
+    rental:{ level:"unknown", text:"Citi lists Worldwide Car Rental Insurance but doesn't say whether it's primary or secondary." },
+    perks:[
+      {name:"Yearly reward certificate", text:"Your cash back comes once a year after your February statement. Use it at Costco by Dec 31."},
+      {name:"Purchase protection", text:"Stuff you buy is covered for 120 days if it breaks or gets stolen."},
+      {name:"No foreign transaction fees", text:"No extra fee when you buy things in another country."},
+    ]},
+  { id:"double-cash", name:"Citi Double Cash", fullName:"Citi Double Cash® Card", issuer:"Citi", network:"Mastercard", program:"TY", programName:"Citi cash back", cash:true, annualFee:0, art:"c-dc", color:"#2D3E50", source:SRC2.dc,
+    aliases:["double cash","citi double cash","citi"],
+    earn:[
+      {cat:"hotels", mult:5, how:"portal", text:"on hotels booked through Citi Travel"},
+      {cat:"car_rental", mult:5, how:"portal", text:"on rental cars booked through Citi Travel"},
+    ], base:2, baseText:"on everything (1% when you buy, 1% when you pay)",
+    rental:NO_RENTAL,
+    perks:[
+      {name:"2% on everything", text:"Same cash back everywhere, with no categories to track."},
+      {name:"Extended warranty", text:"Some extra warranty coverage on things you buy."},
+    ]},
+  { id:"active-cash", name:"Active Cash", fullName:"Wells Fargo Active Cash® Card", issuer:"Wells Fargo", network:"Visa", program:"WF", programName:"Wells Fargo cash back", cash:true, annualFee:0, art:"c-ac", color:"#7A3434", source:SRC2.ac,
+    aliases:["active cash","wells fargo","wells fargo active cash"],
+    earn:[], base:2, baseText:"on everything",
+    rental:{ level:"secondary", text:"Covers rental car damage or theft after your own insurance pays. Pay for the whole rental with the card and decline the counter's coverage." },
+    perks:[
+      {name:"Cell phone protection", text:"Pay your phone bill with this card and a broken or stolen phone is covered, up to $600 ($25 deductible)."},
+      {name:"2% on everything", text:"Same cash back everywhere, with no categories to track."},
+      {name:"Foreign transaction fee", text:"Charges 3% on purchases abroad, so leave it home when you travel."},
+    ]},
+  { id:"discover-it", name:"Discover it", fullName:"Discover it® Cash Back", issuer:"Discover", network:"Discover", program:"DISC", programName:"Discover cash back", cash:true, annualFee:0, art:"c-disc", color:"#B66A2C", source:SRC2.discover,
+    aliases:["discover","discover it"],
+    earn:[
+      {cat:"dining", mult:5, how:"any", rotating:true, from:"2026-10-01", until:"2026-12-31", text:"at restaurants in Oct–Dec 2026", cap:"activate first; up to the quarterly max"},
+    ], base:1,
+    rental:NO_RENTAL,
+    perks:[
+      {name:"Rotating 5% categories", text:"New 5% categories every 3 months, up to a limit. Turn them on each time."},
+      {name:"Cashback Match", text:"In your first year, Discover doubles all the cash back you earn."},
+      {name:"No annual fee", text:"You pay nothing to keep the card."},
+    ]},
+  { id:"amex-green", name:"Amex Green", fullName:"American Express® Green Card", issuer:"American Express", network:"Amex", program:"MR", programName:"Membership Rewards", annualFee:150, closed:true, art:"c-green", color:"#3D6A4E", source:"https://frequentmiler.com/amex-green-card-review/",
+    aliases:["green","amex green","green card"],
+    earn:[
+      {cat:"dining", mult:3, how:"any", text:"at restaurants"},
+      {cat:"flights", mult:3, how:"any", text:"on travel"}, {cat:"hotels", mult:3, how:"any", text:"on travel"}, {cat:"car_rental", mult:3, how:"any", text:"on travel"},
+      {cat:"transit", mult:3, how:"any", text:"on transit, taxis and rideshare"}, {cat:"lyft", mult:3, how:"any", text:"on rideshare"},
+    ], base:1,
+    rental:{ level:"unknown", text:"Amex cards usually have secondary rental coverage, but we couldn't confirm the Green Card's current terms." },
+    perks:[
+      {name:"Closed to new applicants", text:"Amex stopped taking new applications in mid-2026. If you already have it, it still works."},
+      {name:"No foreign transaction fees", text:"No extra fee when you buy things in another country."},
+    ]},
+);
+
+BENEFITS.push(
+  { id:"csp-hotel", cardId:"csp", name:"Chase Travel hotel credit", merchant:"Chase Travel hotels", value:100, frequency:"annual", cycle:"anniversary", type:"statement",
+    description:"Up to $100 back on hotels booked through Chase Travel each card year.", merchants:["Hotels booked through Chase Travel"], enrollment:false, activation:"Book a hotel in Chase Travel with the card. It's applied automatically.",
+    terms:"Resets on your card anniversary. The first $100 of hotel purchases each year doesn't earn points.", keywords:["chase travel","hotel"], sourceUrl:SRC2.csp },
+  { id:"csp-doordash", cardId:"csp", name:"DoorDash $10 promo", merchant:"DoorDash", value:10, frequency:"monthly", cycle:"calendar", type:"promo", endsOn:"2029-12-31",
+    description:"$10 off one non-restaurant DoorDash order each month, like groceries.", merchants:["DoorDash grocery, retail and convenience"], enrollment:true, activation:"Turn on DashPass with the card, then pick the promo at checkout.",
+    terms:"Through Dec 31, 2029. Unused value doesn't roll over.", keywords:["doordash"], sourceUrl:SRC2.csp },
+  { id:"cfu-doordash", cardId:"cfu", name:"DoorDash $10 promo", merchant:"DoorDash", value:10, frequency:"quarterly", cycle:"calendar", type:"promo", endsOn:"2027-12-31",
+    description:"Up to $10 off one non-restaurant DoorDash order each quarter.", merchants:["DoorDash grocery, retail and convenience"], enrollment:true, activation:"Turn on DashPass with the card, then pick the promo at checkout.",
+    terms:"For DashPass members, through Dec 31, 2027.", keywords:["doordash"], sourceUrl:SRC2.cfu },
+  { id:"flex-q4", cardId:"flex", name:"5% categories: groceries & dining", merchant:"Grocery stores & restaurants", value:75, frequency:"quarterly", cycle:"calendar", type:"points", startsOn:"2026-10-01", endsOn:"2026-12-31",
+    description:"5% back on up to $1,500 at grocery stores and restaurants in Oct–Dec 2026, worth up to $75 extra.", merchants:["Grocery stores (not Walmart or Target)","Restaurants","American Red Cross donations"], enrollment:true, activation:"Activate this quarter's categories in your Chase account. Check the deadline there.",
+    terms:"Cap is $1,500 in combined purchases. Mark it used once you've hit the cap.", keywords:["freedom","5%"], sourceUrl:SRC2.flex },
+  { id:"flex-doordash", cardId:"flex", name:"DoorDash $10 promo", merchant:"DoorDash", value:10, frequency:"quarterly", cycle:"calendar", type:"promo", endsOn:"2027-12-31",
+    description:"Up to $10 off one non-restaurant DoorDash order each quarter.", merchants:["DoorDash grocery, retail and convenience"], enrollment:true, activation:"Turn on DashPass with the card, then pick the promo at checkout.",
+    terms:"For DashPass members, through Dec 31, 2027.", keywords:["doordash"], sourceUrl:SRC2.flex },
+  { id:"vx-travel", cardId:"venture-x", name:"$300 travel credit", merchant:"Capital One Travel", value:300, frequency:"annual", cycle:"anniversary", type:"statement",
+    description:"Up to $300 back on bookings made through Capital One Travel each year.", merchants:["Flights, hotels and rental cars booked through Capital One Travel"], enrollment:false, activation:"Book through Capital One Travel with the card.",
+    terms:"Only bookings made through Capital One Travel count. Capital One's page doesn't say exactly when it resets, so we track it by card year.", keywords:["capital one travel"], sourceUrl:SRC2.vx },
+  { id:"vx-miles", cardId:"venture-x", name:"10,000 anniversary miles", merchant:"Capital One miles", value:100, frequency:"annual", cycle:"anniversary", type:"points",
+    description:"10,000 bonus miles every card anniversary, worth about $100 in travel.", merchants:["Added to your account automatically"], enrollment:false, activation:"Nothing to do. They arrive after each anniversary.",
+    terms:"Starts at your first anniversary.", keywords:["miles"], sourceUrl:"https://www.nerdwallet.com/reviews/credit-cards/capital-one-venture-x" },
+  { id:"flex-q4-disc", cardId:"discover-it", name:"5% categories this quarter", merchant:"Rotating categories", value:75, frequency:"quarterly", cycle:"calendar", type:"points", startsOn:"2026-10-01", endsOn:"2026-12-31",
+    description:"5% back in this quarter's categories up to the quarterly max. Reports list restaurants for Oct–Dec 2026.", merchants:["Check Discover's 5% calendar for this quarter"], enrollment:true, activation:"Activate in your Discover or Capital One account.",
+    terms:"Reported by news sites. Discover's page doesn't list this quarter, so confirm in your account.", keywords:["discover","5%"], verified:false, sourceUrl:"https://www.insideflyer.com/posts/q4-2026-rotating-5-cashback-categories-now-active/" },
+  { id:"green-clear", cardId:"amex-green", name:"CLEAR+ credit", merchant:"CLEAR+", value:199, frequency:"annual", cycle:"calendar", type:"membership",
+    description:"Up to $199 back each year on a CLEAR+ membership.", merchants:["CLEAR+"], enrollment:false, activation:"Pay for CLEAR+ with the card.",
+    terms:"From a review site. Amex's Green page wasn't available to confirm.", keywords:["clear"], verified:false, sourceUrl:"https://frequentmiler.com/amex-green-card-review/" },
+);
+
+
+/* ---- Bank of America cards (bankofamerica.com, checked 2026-10-11) ---- */
+const BOFA = {
+  ccr:"https://www.bankofamerica.com/credit-cards/products/cash-back-credit-card/",
+  ucr:"https://www.bankofamerica.com/credit-cards/products/unlimited-cash-back-credit-card/",
+  tr:"https://www.bankofamerica.com/credit-cards/products/travel-rewards-credit-card/",
+  pr:"https://www.bankofamerica.com/credit-cards/products/premium-rewards-credit-card/",
+  pre:"https://www.bankofamerica.com/credit-cards/products/premium-rewards-elite-credit-card/",
+};
+const BOFA_RENTAL = { level:"unknown", text:"Bank of America's card page doesn't say whether this card includes rental car coverage. Check the Guide to Benefits." };
+const BOFA_BONUS = {name:"BofA Rewards bonus", text:"If you bank with Bank of America, you can earn extra cash back on top of the normal rate. The bonus depends on your balances."};
+const CHOICES = { gas:"Gas & EV charging", online:"Online shopping", dining:"Dining", travel:"Travel", drugstore:"Drugstores", home:"Home improvement" };
+CARDS.push(
+  { id:"bofa-custom", name:"Customized Cash", fullName:"Bank of America® Customized Cash Rewards", issuer:"Bank of America", network:"Visa", program:"BOFA", programName:"BofA cash back", cash:true, annualFee:0, fxFee:true, art:"c-bofa", color:"#9E2A2F", source:BOFA.ccr, choiceCard:true,
+    aliases:["customized cash","bofa customized","bank of america customized cash","bank of america cash"],
+    earn:[
+      {cat:"gas", mult:3, how:"any", choice:"gas", text:"on gas & EV charging (your 3% pick)", cap:"3% and 2% combined on up to $2,500 a quarter"},
+      {cat:"online", mult:3, how:"any", choice:"online", text:"on online shopping (your 3% pick)", cap:"3% and 2% combined on up to $2,500 a quarter"},
+      {cat:"amazon", mult:3, how:"any", choice:"online", text:"on online shopping (your 3% pick)", cap:"3% and 2% combined on up to $2,500 a quarter"},
+      {cat:"streaming", mult:3, how:"any", choice:"online", text:"on streaming, internet and phone (your 3% pick)"},
+      {cat:"dining", mult:3, how:"any", choice:"dining", text:"on dining (your 3% pick)", cap:"3% and 2% combined on up to $2,500 a quarter"},
+      {cat:"flights", mult:3, how:"any", choice:"travel", text:"on travel (your 3% pick)"}, {cat:"hotels", mult:3, how:"any", choice:"travel", text:"on travel (your 3% pick)"}, {cat:"car_rental", mult:3, how:"any", choice:"travel", text:"on travel (your 3% pick)"},
+      {cat:"drugstore", mult:3, how:"any", choice:"drugstore", text:"at drugstores (your 3% pick)"},
+      {cat:"home", mult:3, how:"any", choice:"home", text:"on home improvement (your 3% pick)"},
+      {cat:"groceries", mult:2, how:"any", text:"at grocery stores and wholesale clubs", cap:"on up to $2,500 a quarter combined with your 3% pick"},
+      {cat:"costco", mult:2, how:"any", text:"at wholesale clubs"},
+    ], base:1,
+    rental:BOFA_RENTAL,
+    caveats:["You pick one 3% category and can change it once a month.","The 3% and 2% rates stop after $2,500 a quarter.","Charges a 3% fee on purchases abroad."],
+    perks:[
+      {name:"Pick your 3% category", text:"Choose gas, online shopping, dining, travel, drugstores or home improvement. You can switch once a month."},
+      {name:"Extra 3% the first year", text:"New cardholders get 6% in their chosen category for the first year."},
+      BOFA_BONUS,
+    ]},
+  { id:"bofa-unlimited", name:"Unlimited Cash", fullName:"Bank of America® Unlimited Cash Rewards", issuer:"Bank of America", network:"Visa", program:"BOFA", programName:"BofA cash back", cash:true, annualFee:0, fxFee:true, art:"c-bofa2", color:"#6E2026", source:BOFA.ucr,
+    aliases:["unlimited cash","bofa unlimited","bank of america unlimited"],
+    earn:[], base:1.5, baseText:"on everything",
+    rental:BOFA_RENTAL,
+    caveats:["1.5% is lower than the 2% cards unless you get the BofA Rewards bonus.","Charges a 3% fee on purchases abroad."],
+    perks:[ {name:"Simple flat rate", text:"Same cash back on everything, so there's nothing to track."}, BOFA_BONUS ]},
+  { id:"bofa-travel", name:"BofA Travel Rewards", fullName:"Bank of America® Travel Rewards", issuer:"Bank of America", network:"Visa", program:"BOFA", programName:"BofA points", annualFee:0, art:"c-bofa3", color:"#3B4F6B", source:BOFA.tr,
+    aliases:["bofa travel","bank of america travel","travel rewards"],
+    earn:[], base:1.5, baseText:"points on everything",
+    rental:BOFA_RENTAL,
+    caveats:["Points only turn into credits for travel and dining purchases.","No airport lounges or travel credits."],
+    perks:[ {name:"No foreign transaction fees", text:"No extra fee when you buy things in another country."}, {name:"Easy travel redemption", text:"Use points to wipe off flights, hotels or restaurant charges from your statement."}, BOFA_BONUS ]},
+  { id:"bofa-premium", name:"Premium Rewards", fullName:"Bank of America® Premium Rewards®", issuer:"Bank of America", network:"Visa", program:"BOFA", programName:"BofA points", annualFee:95, art:"c-bofa4", color:"#20324A", source:BOFA.pr,
+    aliases:["premium rewards","bofa premium","bank of america premium"],
+    earn:[
+      {cat:"dining", mult:2, how:"any", text:"on dining"},
+      {cat:"flights", mult:2, how:"any", text:"on travel"}, {cat:"hotels", mult:2, how:"any", text:"on travel"}, {cat:"car_rental", mult:2, how:"any", text:"on travel"}, {cat:"transit", mult:2, how:"any", text:"on travel"},
+    ], base:1.5, baseText:"on everything else",
+    rental:{ level:"unknown", text:"Bank of America lists an auto rental collision damage waiver but doesn't say whether it's primary or secondary." },
+    caveats:["Best if you also bank with Bank of America for the rewards bonus.","No airport lounges."],
+    perks:[
+      {name:"Global Entry or TSA PreCheck", text:"The card pays your fee to get through airport lines faster, up to $100 every 4 years."},
+      {name:"Trip protections", text:"Help if your trip is delayed or canceled, or your bag is lost."},
+      {name:"No foreign transaction fees", text:"No extra fee when you buy things in another country."},
+      BOFA_BONUS,
+    ]},
+  { id:"bofa-elite", name:"Premium Rewards Elite", fullName:"Bank of America® Premium Rewards® Elite", issuer:"Bank of America", network:"Visa", program:"BOFA", programName:"BofA points", annualFee:550, art:"c-bofa5", color:"#1B1F2A", source:BOFA.pre,
+    aliases:["premium rewards elite","bofa elite","bank of america elite"],
+    earn:[
+      {cat:"dining", mult:2, how:"any", text:"on dining"},
+      {cat:"flights", mult:2, how:"any", text:"on travel"}, {cat:"hotels", mult:2, how:"any", text:"on travel"}, {cat:"car_rental", mult:2, how:"any", text:"on travel"}, {cat:"transit", mult:2, how:"any", text:"on travel"},
+    ], base:1.5, baseText:"on everything else",
+    rental:{ level:"unknown", text:"Bank of America lists Visa Infinite car rental perks but the card page doesn't describe collision coverage." },
+    caveats:["The $550 fee only pays off if you use the $300 airline and $150 lifestyle credits.","Earning rates are lower than other premium cards."],
+    perks:[
+      {name:"Priority Pass", text:"Free airport lounge access, with up to 4 memberships to share."},
+      {name:"20% off flights with points", text:"Your points go further when you use them to pay for airfare."},
+      {name:"Global Entry or TSA PreCheck", text:"The card pays your fee to get through airport lines faster, once every 4 years."},
+      {name:"No foreign transaction fees", text:"No extra fee when you buy things in another country."},
+      BOFA_BONUS,
+    ]},
+);
+BENEFITS.push(
+  { id:"bofa-pr-airline", cardId:"bofa-premium", name:"Airline incidental credit", merchant:"Airline fees", value:100, frequency:"annual", cycle:"calendar", type:"statement",
+    description:"Up to $100 a year back on airline extras like bag fees, seat upgrades and in-flight purchases.", merchants:["Seat upgrades, bag fees, in-flight services, lounge fees"], enrollment:false, activation:"Pay airline fees with the card. Credits apply automatically.",
+    terms:"The card page says annually. We track it by calendar year, so check your account for the exact reset.", keywords:["airline fee","bag fee"], sourceUrl:BOFA.pr },
+  { id:"bofa-elite-airline", cardId:"bofa-elite", name:"Airline incidental credit", merchant:"Airline fees", value:300, frequency:"annual", cycle:"calendar", type:"statement",
+    description:"Up to $300 a year back on airline extras like bag fees, seat upgrades and lounge fees.", merchants:["Seat upgrades, bag fees, in-flight services, lounge fees"], enrollment:false, activation:"Pay airline fees with the card. Credits apply automatically.",
+    terms:"The card page says annually. We track it by calendar year, so check your account for the exact reset.", keywords:["airline fee","bag fee"], sourceUrl:BOFA.pre },
+  { id:"bofa-elite-life", cardId:"bofa-elite", name:"Lifestyle credit", merchant:"Streaming, delivery, fitness, rideshare", value:150, frequency:"annual", cycle:"calendar", type:"statement",
+    description:"Up to $150 a year back on streaming, food delivery, fitness subscriptions and rideshare.", merchants:["Streaming video","Food delivery","Fitness subscriptions","Rideshare"], enrollment:false, activation:"Pay for these services with the card.",
+    terms:"The card page says annually. We track it by calendar year.", keywords:["streaming","delivery","rideshare","fitness"], sourceUrl:BOFA.pre },
+);
+
+/* Plain-language caveats for cards added earlier */
+const CAVEATS = {
+  "amex-gold":["The credits come in small monthly amounts you have to remember.","Amex isn't accepted everywhere, especially abroad."],
+  "amex-plat":["The $895 fee only pays off if you use many of its credits.","It's a lot of small credits to keep track of.","Only 1x on everyday spending."],
+  "csr":["The $795 fee needs the travel, dining and other credits to pay off.","Only 1x on everyday spending."],
+  "bilt-palladium":["The $495 fee is high unless you use the $400 hotel credit and $200 Bilt Cash.","You can only have one Bilt card."],
+  "csp":["Only 1x on everyday spending outside its categories."],
+  "cfu":["Charges a 3% fee on purchases abroad."],
+  "flex":["You have to turn on the 5% categories every quarter, and they're capped at $1,500."],
+  "prime-visa":["You need a Prime membership to get 5%."],
+  "venture-x":["Priority Pass guests now cost $35 each.","The $300 travel credit only works through Capital One Travel."],
+  "venture":["No travel credits or lounges."],
+  "savor":["Only 1% outside its categories."],
+  "quicksilver":["1.5% is lower than the 2% cards."],
+  "apple-card":["Only 1% when you use the physical card.","Best if you have an iPhone and use Apple Pay."],
+  "robinhood-gold":["You need Robinhood Gold, about $50 a year.","Cash back is worth the most when you move it into a Robinhood account.","Applications have used a waitlist."],
+  "costco-citi":["You need a Costco membership.","Your cash back comes once a year as a certificate you redeem at Costco."],
+  "double-cash":["Charges a 3% fee on purchases abroad."],
+  "active-cash":["Charges a 3% fee on purchases abroad."],
+  "discover-it":["Discover isn't accepted everywhere, especially abroad.","You have to turn on the 5% categories every quarter."],
+};
+CARDS.forEach(c => { if (!c.caveats && CAVEATS[c.id]) c.caveats = CAVEATS[c.id]; });
+["cfu","double-cash","active-cash"].forEach(id => { const c = CARDS.find(x => x.id === id); if (c) c.fxFee = true; });
+
+BENEFITS.forEach(b => { if (b.verified === undefined) b.verified = true; b.verifiedOn = VERIFIED; b.annualValue = annualOf(b); });
+function annualOf(b){ const n = {monthly:12, quarterly:4, semiannual:2, annual:1}[b.frequency]; return +(b.value*n + (b.decemberValue ? b.decemberValue - b.value : 0)).toFixed(2); }
+const cardById = id => CARDS.find(c => c.id === id);
+const benefitById = id => BENEFITS.find(b => b.id === id);
+
+/* ---------- 2. STORE ----------------------------------------------------- */
+const KEY = "kept.v1";
+let memoryOnly = false;
+function defaultState(){ return { v:1, cards:[], tracking:{}, settings:{ reminderDays:7, banner:true, pointValues:{MR:1, UR:1, BILT:1}, valuations:{} }, example:false }; }
+function load(){ try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.v === 1) return Object.assign(defaultState(), s); } catch(e){ memoryOnly = true; } return defaultState(); }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ memoryOnly = true; } }
+let S = load();
+const ui = { tab:"home", card:null, filter:"all", answer:null, sheet:null, picks:[] };
+
+/* ---------- 3. PERIODS --------------------------------------------------- */
+const DAY = 86400000;
+const now = () => { const d = window.__KEPT_NOW ? new Date(window.__KEPT_NOW) : new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate() + (ui.offsetDays || 0)); };
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const parse = s => { if (!s) return null; const [y,m,d] = s.split("-").map(Number); return y ? new Date(y, m-1, d||1) : null; };
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const fmtDate = (d, yr) => d.toLocaleDateString("en-US", yr ? {month:"short", day:"numeric", year:"numeric"} : {month:"short", day:"numeric"});
+const money = n => { const r = Math.round(n*100)/100; return "$" + (Number.isInteger(r) ? r.toLocaleString("en-US") : r.toLocaleString("en-US",{minimumFractionDigits:2, maximumFractionDigits:2})); };
+const daysUntil = (end, t) => Math.round((end - t)/DAY);
+
+function periodOf(b, inst, t){
+  const y = t.getFullYear(), m = t.getMonth();
+  let start, end, key, label, assumed = false;
+  if (b.frequency === "monthly"){ start = new Date(y,m,1); end = new Date(y,m+1,0); key = `${y}-M${String(m+1).padStart(2,"0")}`; label = MONTHS[m]; }
+  else if (b.frequency === "quarterly"){ const q = Math.floor(m/3); start = new Date(y,q*3,1); end = new Date(y,q*3+3,0); key = `${y}-Q${q+1}`; label = `Q${q+1} ${y}`; }
+  else if (b.frequency === "semiannual"){ const h = m < 6 ? 0 : 1; start = new Date(y,h*6,1); end = new Date(y,h*6+6,0); key = `${y}-H${h+1}`; label = h ? `Jul–Dec ${y}` : `Jan–Jun ${y}`; }
+  else if (b.cycle === "anniversary"){
+    const od = parse(inst && inst.openedDate);
+    if (!od){ assumed = true; start = new Date(y,0,1); end = new Date(y,11,31); key = `${y}`; label = `${y} (estimated)`; }
+    else { let s = new Date(y, od.getMonth(), od.getDate()); if (s > t) s = new Date(y-1, od.getMonth(), od.getDate());
+      start = s; end = new Date(s.getFullYear()+1, s.getMonth(), s.getDate()-1); key = `A${iso(s)}`; label = `Card year from ${fmtDate(s, true)}`; }
+  } else { start = new Date(y,0,1); end = new Date(y,11,31); key = `${y}`; label = `${y}`; }
+  const stop = parse(b.endsOn), begin = parse(b.startsOn);
+  if (stop && start > stop) return null;
+  if (begin && end < begin) return null;
+  if (stop && end > stop) end = stop;
+  const value = (b.decemberValue && b.frequency === "monthly" && m === 11) ? b.decemberValue : b.value;
+  return { key, start, end, label, value, assumed };
+}
+
+function itemFor(b, inst, t){
+  const p = periodOf(b, inst, t); if (!p) return null;
+  const rec = (S.tracking[b.id] || {})[p.key];
+  const status = rec ? rec.status : "unused";
+  const used = status === "used" ? p.value : status === "partial" ? Math.min(+rec.amount || 0, p.value) : 0;
+  const remaining = status === "na" ? 0 : Math.max(0, p.value - used);
+  const done = status === "na" || status === "used" || remaining < 0.005;
+  return { b, card:cardById(b.cardId), inst, p, status, used, remaining, done, days:daysUntil(p.end, t) };
+}
+function allItems(t = now()){
+  const out = [];
+  S.cards.forEach(inst => BENEFITS.filter(b => b.cardId === inst.id).forEach(b => { const it = itemFor(b, inst, t); if (it) out.push(it); }));
+  return out;
+}
+const valuation = id => { const v = S.settings.valuations[id]; return v === undefined ? 100 : v; };
+
+/* Fee recovery: advertised vs redeemed vs what the user says it's worth to them, this calendar year */
+function feeStats(cardId, t = now()){
+  const card = cardById(cardId), inst = S.cards.find(c => c.id === cardId), yr = t.getFullYear();
+  let advertised = 0, potential = 0, redeemed = 0, yours = 0;
+  BENEFITS.filter(b => b.cardId === cardId).forEach(b => {
+    const p = periodOf(b, inst, t); if (!p) return;
+    advertised += b.annualValue; potential += b.annualValue * valuation(b.id)/100;
+    Object.entries(S.tracking[b.id] || {}).forEach(([k, r]) => {
+      const inYear = k.startsWith("A") ? k === p.key : k.startsWith(String(yr));
+      if (!inYear || r.status === "na") return;
+      const amt = r.status === "used" ? (+r.value || 0) : Math.min(+r.amount || 0, +r.value || Infinity);
+      redeemed += amt; yours += amt * valuation(b.id)/100;
+    });
+  });
+  return { card, fee:card.annualFee, advertised, potential, redeemed, yours, left:Math.max(0, card.annualFee - yours) };
+}
+
+function setStatus(b, p, status, amount){
+  S.tracking[b.id] = S.tracking[b.id] || {};
+  if (status === "unused") delete S.tracking[b.id][p.key];
+  else S.tracking[b.id][p.key] = { status, amount: status === "partial" ? Math.max(0, Math.min(+amount || 0, p.value)) : status === "used" ? p.value : 0, value:p.value, end:iso(p.end), label:p.label, at:new Date().toISOString() };
+  save();
+}
+
+/* ---------- 4. ASSISTANT --------------------------------------------------
+   Rule-based: every answer comes from the catalog above. No AI model is used. */
+const CATS = {
+  dining:{ label:"dining", re:/\b(dining|dine|restaurant|dinner|lunch|brunch|breakfast|food|eat|eating|bar|cafe|takeout|date night)\b/ },
+  groceries:{ label:"groceries", re:/\b(grocer(y|ies)|supermarket|whole foods|trader joe'?s|safeway|kroger|publix|ralphs|vons|produce)\b/ },
+  flights:{ label:"flights", re:/\b(flight|flights|airfare|airline|plane ticket|fly|flying)\b/ },
+  hotels:{ label:"hotels", re:/\b(hotel|hotels|resort|stay|lodging)\b/ },
+  car_rental:{ label:"car rentals", re:/\b(car rentals?|rental cars?|rent(ing)? a car|rentals?|hertz|avis|enterprise|national car|sixt|budget car|turo)\b/ },
+  lyft:{ label:"Lyft", re:/\blyft\b/ },
+  rent:{ label:"rent & mortgage", re:/\b(rent|mortgage|landlord)\b/ },
+  gas:{ label:"gas", re:/\b(gas|fuel|gas station)\b/ },
+  amazon:{ label:"Amazon", re:/\b(amazon|audible|whole foods)\b/ },
+  online:{ label:"online shopping", re:/\b(online|shopping|target|walmart|best buy|ebay|etsy|clothes)\b/ },
+  drugstore:{ label:"drugstores", re:/\b(drugstore|pharmacy|cvs|walgreens|rite aid|duane reade)\b/ },
+  streaming:{ label:"streaming", re:/\b(streaming|netflix|hulu|spotify|disney\+?|max|peacock)\b/ },
+  entertainment:{ label:"entertainment", re:/\b(concert|movie|movies|tickets|theater|theatre|entertainment)\b/ },
+  transit:{ label:"transit", re:/\b(transit|subway|train|bus|metro|taxi|uber)\b/ },
+  home:{ label:"home improvement", re:/\b(home depot|lowe'?s|ikea|furniture|home improvement|hardware)\b/ },
+  apple:{ label:"Apple", re:/\b(apple store|iphone|macbook|ipad|airpods|apple watch)\b/ },
+  travel:{ label:"travel", re:/\b(travel|trip|vacation)\b/ },
+};
+const CARD_WORDS = [["amex-plat",/\b(platinum|plat)\b/],["amex-gold",/\b(amex gold|gold card|my gold|the gold|gold)\b/],["csr",/\b(sapphire|reserve|csr)\b/],["bilt-palladium",/\b(bilt|palladium)\b/]];
+const PV = prog => S.settings.pointValues[prog] || 1;
+
+const ruleLive = r => (!r.until || now() <= parse(r.until)) && (!r.from || now() >= parse(r.from));
+function bestRule(card, cat, ignoreRotating){
+  const cats = cat === "travel" ? ["flights","hotels"] : [cat];
+  const inst = S.cards.find(i => i.id === card.id);
+  const rules = card.earn.filter(r => cats.includes(r.cat) && ruleLive(r) && !(ignoreRotating && r.rotating) && (!r.choice || !inst || (inst.choice || "gas") === r.choice));
+  const anywhere = rules.filter(r => r.how === "any" || r.how === "direct").sort((a,b)=>b.mult-a.mult)[0];
+  let portal = rules.filter(r => r.how === "portal" || r.how === "partner").sort((a,b)=>b.mult-a.mult)[0];
+  if (["flights","hotels","car_rental","travel"].includes(cat)){ const p = card.earn.find(r => r.cat === "portal"); if (p && (!portal || p.mult > portal.mult)) portal = p; }
+  const base = { mult:card.base, how:"any", text: card.baseText || "on other purchases", isBase:true };
+  return { main: anywhere && anywhere.mult >= card.base ? anywhere : base, portal: portal && portal.mult > (anywhere ? anywhere.mult : card.base) ? portal : null };
+}
+const xr = (m, c) => c && c.cash ? `${m}%` : `${m}x`;
+const unit = c => c && c.cash ? "cash back" : "points";
+const cents = (mult, card) => (mult * PV(card.program)).toFixed(1).replace(/\.0$/,"");
+
+function walletCards(){ return S.cards.map(i => cardById(i.id)); }
+function namedCards(q){
+  const hits = [];
+  CARDS.forEach(c => c.aliases.forEach(a => { if (a.length > 3 && new RegExp(`\\b${a.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}\\b`).test(q)) hits.push({ id:c.id, a }); }));
+  const keep = hits.filter(h => !hits.some(o => o.id !== h.id && o.a.length > h.a.length && o.a.includes(h.a)));
+  return [...new Set(keep.map(h => h.id))];
+}
+
+function categoryAnswer(cat, q, restrictTo){
+  let cards = walletCards();
+  const notOwned = (restrictTo||[]).filter(id => !S.cards.some(c => c.id === id));
+  if (restrictTo && restrictTo.length) cards = cards.filter(c => restrictTo.includes(c.id));
+  if (!cards.length) cards = walletCards();
+  const travelBoost = c => cat === "travel" ? (c.rental.level === "primary" ? 1.5 : 0) + (c.perks.some(p => /lounge|priority pass/i.test(p.name + p.text)) ? 0.5 : 0) + (c.network === "Discover" || c.id === "active-cash" ? -2 : 0) : 0;
+  const score = x => x.r.main.mult * PV(x.c.program) + travelBoost(x.c);
+  const ranked = cards.map(c => ({ c, r:bestRule(c, cat) })).sort((a,b) => score(b) - score(a) || b.r.main.mult - a.r.main.mult);
+  const top = ranked[0], label = CATS[cat].label;
+  const A = { q, pick:top.c.id, title:`Use ${top.c.name}`, why:[], watch:[], alts:[], credits:[], sources:[top.c.source] };
+  A.why.push(`Earns ${xr(top.r.main.mult, top.c)} ${top.c.programName} ${top.r.main.text}${top.r.main.cap ? ` (${top.r.main.cap})` : ""}.`);
+  A.short = `${xr(top.r.main.mult, top.c)} ${unit(top.c)} ${top.r.main.text}.`;
+  A.cta = { label:`See ${top.c.name} benefits`, tab:"benefits", card:top.c.id };
+  A.why.push("That's how many points you earn. What they're worth depends on how you redeem them.");
+  if (top.r.main.isBase) A.watch.push(`None of your cards has a bonus category for ${label} that applies everywhere, so this is just the best everyday rate.`);
+  ranked.forEach(({c, r}) => {
+    if (r.portal) A.alts.push({ card:c, text:`${xr(r.portal.mult, c)} ${r.portal.text}`, note:r.portal.how === "partner" ? "only at participating spots" : "book through the issuer's travel site; prices can differ" });
+    if (c !== top.c) A.alts.push({ card:c, text:`${xr(r.main.mult, c)} ${r.main.text}` });
+  });
+  if (cat === "groceries" && top.c.id === "amex-gold") A.watch.push("Amex's supermarket category usually excludes superstores and warehouse clubs (Walmart, Target, Costco). Check your Card terms.");
+  if (["flights","hotels","car_rental","travel"].includes(cat) && S.cards.some(c => c.id === "csr")) A.watch.push(cardById("csr").travelCreditNote);
+  if (cat === "flights"){
+    const prot = cards.map(c => ({ "amex-plat":"Platinum: trip delay up to $500 after 6 hours", "csr":"Sapphire Reserve: trip delay up to $500 after 6 hours, plus cancellation up to $10,000/person", "amex-gold":"Gold: trip delay up to $300 after 12 hours", "bilt-palladium":"Bilt Palladium: Mastercard travel protections (see Guide to Benefits)" }[c.id])).filter(Boolean);
+    if (prot.length > 1) A.watch.push("Trip protections only apply when you pay with that card. " + prot.join(". ") + ".");
+  }
+  if (cat === "rent" && !cards.some(c => c.id === "bilt-palladium")) A.watch.push("Most cards charge a fee or earn nothing on rent. None of your cards has a rent category.");
+  notOwned.forEach(id => A.watch.push(`${cardById(id).name} isn't in your wallet, so I left it out.`));
+  A.credits = relatedCredits(cat);
+  if (A.credits[0]) A.extra = `You also have ${money(A.credits[0].remaining)} left on your ${A.credits[0].card.name} ${A.credits[0].b.name}.`;
+  if (top.r.main.isBase) A.heads = `None of your cards has a bonus for ${label}, so this is your best everyday card.`;
+  if (top.r.main.rotating) A.heads = `Only if you activated this quarter's 5% categories, and only up to the cap. Otherwise use your next-best card.`;
+  if (top.r.main.isBase && ranked.every(x => x.r.main.mult === top.r.main.mult)){
+    A.pick = null; A.title = `No card earns extra for ${label}`; A.short = `All your cards earn ${xr(top.r.main.mult, top.c)} ${unit(top.c)} here, so any of them works.`; A.heads = null; A.cta = { label:"Compare your cards", tab:"benefits", card:S.cards[0].id };
+  }
+  addUpsell(A, cat, top.r.main.mult);
+  if (cat === "travel" && top.c.id !== "csr" && S.cards.some(c => c.id === "csr")) A.extra = "Sapphire Reserve also gives you a $300 yearly travel credit and primary rental car coverage.";
+  if (cat === "travel" && !A.extra){ const bits = []; if (top.c.rental.level === "primary") bits.push("primary rental car coverage"); if (top.c.perks.some(p => /lounge|priority pass/i.test(p.name + p.text))) bits.push("airport lounge access"); if (bits.length) A.extra = `It also has ${bits.join(" and ")}.`; }
+  if (cat === "online" && S.cards.some(c => c.id === "amex-plat")) A.watch.push("Amazon and Walmart aren't bonus categories on any of your cards. Platinum's Walmart+ credit covers the membership fee only.");
+  return A;
+}
+
+function relatedCredits(catOrWords){
+  const words = typeof catOrWords === "string" ? ({ dining:["restaurant","resy","grubhub","five guys","cheesecake","opentable","dunkin"], hotels:["hotel"], flights:["airline fee"], lyft:["lyft"], groceries:["grocery delivery","walmart"], car_rental:[] }[catOrWords] || []) : catOrWords;
+  return allItems().filter(it => !it.done && it.b.keywords.some(k => words.some(w => k.includes(w) || w.includes(k)))).slice(0, 4);
+}
+
+function rentalAnswer(q, named){
+  let cards = walletCards(); if (named.length) { const f = cards.filter(c => named.includes(c.id)); if (f.length) cards = f; }
+  const rank = { primary:3, secondary:2, unknown:1, none:0 };
+  cards.sort((a,b) => rank[b.rental.level] - rank[a.rental.level]);
+  const top = cards[0];
+  const A = { q, pick:top.id, title: top.rental.level === "primary" ? `Yes: ${top.name} has primary coverage` : top.rental.level === "secondary" ? `${top.name}: secondary coverage only` : top.rental.level === "none" ? "None of your cards list rental car coverage" : `${top.name}: coverage details unverified`, why:[], watch:[], alts:[], credits:[], sources:[] };
+  cards.forEach(c => { (c === top ? A.why : A.alts).push(c === top ? top.rental.text : { card:c, text: c.rental.level === "none" ? "No coverage" : `${c.rental.level === "unknown" ? "Unverified" : c.rental.level[0].toUpperCase()+c.rental.level.slice(1)} coverage`, note:c.rental.text }); A.sources.push(c.rental.source || c.source); });
+  A.short = RENTAL_SIMPLE[top.rental.level];
+  A.cta = { label:`See ${top.name} benefits`, tab:"benefits", card:top.id };
+  A.watch.push("Secondary means it pays after your personal auto insurance. Neither type covers liability.");
+  A.watch.push("Rules on vehicle types, rental length and countries vary. Read the card's Guide to Benefits before you decline the counter coverage.");
+  if (named.length && !named.every(id => S.cards.some(c => c.id === id))) A.watch.push("A card you mentioned isn't in your wallet, so I answered for the cards you have.");
+  addUpsell(A, "car_rental", rank[top.rental.level] === 3 ? 3 : 0);
+  return A;
+}
+
+function rentalCarAnswer(q, named){
+  let cards = walletCards(); if (named && named.length){ const f = cards.filter(c => named.includes(c.id)); if (f.length) cards = f; }
+  const rank = { primary:3, secondary:2, unknown:1, none:0 };
+  const scored = cards.map(c => ({ c, cov:c.rental.level, r:bestRule(c, "car_rental") }))
+    .sort((a,b) => rank[b.cov] - rank[a.cov] || b.r.main.mult - a.r.main.mult);
+  const top = scored[0], c = top.c;
+  const covText = { primary:"primary rental car coverage", secondary:"secondary rental car coverage", unknown:"rental car coverage (details not yet confirmed)", none:"no rental car coverage" }[top.cov];
+  const A = { q, pick:c.id, title:`Use ${c.name}`, why:[], watch:[], alts:[], credits:[], sources:[c.rental.source || c.source] };
+  const credit = c.id === "csr" ? " Your $300 travel credit can pay for the rental, too." : "";
+  A.short = `It has ${covText} and earns ${xr(top.r.main.mult, c)} ${unit(c)} on the rental.${credit}`;
+  A.heads = top.cov === "none" ? "None of your cards list rental car coverage, so consider the counter's insurance or your own car insurance." : top.cov === "unknown" ? "Check the card's Guide to Benefits before you skip the counter's insurance." : "Pay for the whole rental with this card and decline the counter's collision coverage.";
+  A.cta = { label:`See ${c.name} benefits`, tab:"benefits", card:c.id };
+  A.why.push(c.rental.text);
+  if (top.r.portal) A.why.push(`Earns ${xr(top.r.portal.mult, c)} ${top.r.portal.text}.`);
+  scored.slice(1).forEach(x => A.alts.push({ card:x.c, text:`${x.cov === "unknown" ? "Coverage unconfirmed" : x.cov === "none" ? "No coverage" : x.cov[0].toUpperCase() + x.cov.slice(1) + " coverage"} · ${xr(x.r.portal ? x.r.portal.mult : x.r.main.mult, x.c)} ${x.r.portal ? x.r.portal.text : "on rentals"}` }));
+  A.watch.push("Primary pays before your own car insurance. Secondary pays after it. Neither covers liability.");
+  if (c.id === "csr") A.watch.push(c.travelCreditNote);
+  addUpsell(A, "car_rental", top.cov === "primary" ? 3 : 0);
+  return A;
+}
+
+/* Best card in the catalog that the user doesn't hold, for a spending category. */
+function bestNewCard(cat){
+  const owned = new Set(S.cards.map(i => i.id));
+  return CARDS.filter(c => !owned.has(c.id) && !c.closed).map(c => ({ c, r:bestRule(c, cat, true) })).sort((a,b) => b.r.main.mult - a.r.main.mult || a.c.annualFee - b.c.annualFee)[0];
+}
+const GOAL_FOR = { amazon:"shopping", drugstore:"everyday", streaming:"dining", entertainment:"dining", transit:"travel", apple:"shopping", dining:"dining", groceries:"dining", flights:"travel", hotels:"travel", travel:"travel", car_rental:"travel", rent:"rent", lyft:"everyday", gas:"everyday", online:"everyday", everyday_fallback:"everyday" };
+function addUpsell(A, cat, topMult){
+  const n = bestNewCard(cat); if (!n) return;
+  if (cat === "car_rental"){ if (topMult < 3 && n.c.rental.level === "primary") A.upsell = { card:n.c, goal:"travel", text:`${n.c.name} comes with primary rental car coverage.` }; return; }
+  if (!n.r.main.isBase && n.r.main.mult > topMult) A.upsell = { card:n.c, goal:GOAL_FOR[cat] || "everyday", text:`${n.c.name} would earn ${xr(n.r.main.mult, n.c)} ${unit(n.c)} ${n.r.main.text}.` };
+  else if (n.r.main.isBase && n.r.main.mult > topMult) A.upsell = { card:n.c, goal:"everyday", text:`${n.c.name} earns ${xr(n.r.main.mult, n.c)} ${unit(n.c)} on everyday purchases.` };
+}
+
+function newCardAnswer(q){
+  const M = matchCards(q);
+  if (!M.generic && M.top){
+    const c = M.top.c;
+    return { q, pick:c.id, title: M.top.owned ? `You already have a great fit: ${c.name}` : `Consider the ${c.name}`, short:M.reasons.join(". ") + ".",
+      extra: M.alt ? `Good alternative: ${compareCards(M.alt.c, c)}` : null, heads: c.caveats && c.caveats[0] ? c.caveats[0] : null, why:(c.caveats||[]).slice(1), watch:["This is a starting point, not financial advice. Check the issuer's rates and terms before you apply."], alts:[], credits:[], sources:[c.source],
+      cta:{ label:"See card ideas", tab:"explore", q } };
+  }
+  return newCardGoalAnswer(q);
+}
+function newCardGoalAnswer(q){
+  const goal = /lounge|airport|luxury/.test(q) ? "lounges" : /travel|flight|hotel|trip|vacation/.test(q) ? "travel" : /rent|mortgage/.test(q) ? "rent" : /dining|restaurant|food|grocer/.test(q) ? "dining" : /amazon|shopping|online|costco/.test(q) ? "shopping" : /\bgas\b|fuel/.test(q) ? "gas" : /no (annual )?fee|cheap|first|starter|beginner/.test(q) ? "lowfee" : /everything|everyday|flat|simple|cash back/.test(q) ? "everyday" : null;
+  const g = goal || suggestGoal();
+  const pick = rankGoal(g).find(x => !x.owned) || rankGoal(g)[0];
+  if (!pick) return { q, pick:null, title:"See card ideas", short:"Pick what you spend the most on.", why:[], watch:[], alts:[], credits:[], sources:[], cta:{ label:"See card ideas", tab:"explore", goal:g } };
+  const c = pick.c;
+  return { q, pick:c.id, title: pick.owned ? `You already have the best one: ${c.name}` : `Consider the ${c.name}`, short:pick.why,
+    extra:`${money(c.annualFee)} annual fee.`, heads:null, why:[], watch:["This is a starting point, not financial advice. Check the issuer's rates and terms before you apply."], alts:[], credits:[], sources:[c.source],
+    cta:{ label:"See card ideas", tab:"explore", goal:g } };
+}
+function suggestGoal(){
+  if (!S.cards.length) return "lowfee";
+  const cards = walletCards();
+  if (!cards.some(c => c.base >= 2)) return "everyday";
+  if (!cards.some(c => ["csp","csr","venture-x","amex-plat","venture"].includes(c.id))) return "travel";
+  if (!cards.some(c => bestRule(c, "dining", true).main.mult >= 3)) return "dining";
+  return "shopping";
+}
+
+function costcoAnswer(q){
+  const visa = walletCards().filter(c => c.network === "Visa").sort((a,b) => (bestRule(b,"costco").main.mult - bestRule(a,"costco").main.mult));
+  const A = { q, pick: visa[0] ? visa[0].id : null, title: visa[0] ? `Use ${visa[0].name}` : "None of your cards work in U.S. Costco warehouses", why:[], watch:[], alts:[], credits:[], sources:[] };
+  A.why.push("U.S. Costco warehouses take Visa as their only credit card network.");
+  if (visa[0]) A.why.push(`${visa[0].name} is a Visa and earns ${xr(bestRule(visa[0],"costco").main.mult, visa[0])} ${unit(visa[0])} at Costco.`);
+  walletCards().filter(c => c.network !== "Visa").forEach(c => A.alts.push({ card:c, text:`${c.network}: not accepted in U.S. warehouses` }));
+  A.short = visa[0] ? `U.S. Costco warehouses only take Visa. ${visa[0].name} is your best Visa there, at ${xr(bestRule(visa[0],"costco").main.mult, visa[0])} ${unit(visa[0])}.` : "U.S. Costco warehouses only take Visa, and none of your cards are Visa.";
+  A.cta = visa[0] ? { label:`See ${visa[0].name} benefits`, tab:"benefits", card:visa[0].id } : { label:"Find a Visa card", tab:"explore", goal:"travel" };
+  A.watch.push("Costco.com and gas stations may accept other networks. I haven't verified their current rules, so check at checkout.");
+  return A;
+}
+
+function expiringAnswer(q, only){
+  const t = now(); let cutoff = null, scope = "";
+  const mm = MONTHS.findIndex(m => new RegExp(`before ${m.toLowerCase()}|by ${m.toLowerCase()}`).test(q));
+  if (mm >= 0){ let y = t.getFullYear(); if (mm <= t.getMonth()) y++; cutoff = new Date(y, mm, 1); scope = `before ${MONTHS[mm]} 1`; }
+  else if (/this month|month/.test(q)){ cutoff = new Date(t.getFullYear(), t.getMonth()+1, 1); scope = `by ${fmtDate(new Date(cutoff - DAY))}`; }
+  else if (/this week|week/.test(q)){ cutoff = new Date(+t + 8*DAY); scope = "in the next 7 days"; }
+  else { cutoff = new Date(+t + 32*DAY); scope = "in the next month"; }
+  const pool = allItems(t).filter(it => !only || only.includes(it.b.cardId));
+  const list = pool.filter(it => !it.done && it.p.end < cutoff).sort((a,b) => a.p.end - b.p.end);
+  const later = pool.filter(it => !it.done && it.p.end >= cutoff);
+  const total = list.reduce((s,it) => s + it.remaining, 0);
+  const A = { q, pick:null, title: list.length ? `${money(total)} resets ${scope}` : `Nothing left to use ${scope}`, why:[], watch:[], alts:[], credits:list.slice(0,8), sources:[] };
+  A.why.push(list.length ? `${list.length} credit${list.length>1?"s":""} across your cards still ha${list.length>1?"ve":"s"} money left. Tap one to mark it used.` : "Every credit that resets in that window is used or marked not applicable.");
+  A.short = list.length ? `Across ${list.length} credit${list.length>1?"s":""} on your cards.` : "You're all caught up.";
+  A.cta = { label:"Open tracker", tab:"tracker", card: list[0] ? list[0].b.cardId : "" };
+  A.why = list.map(it => `${it.card.name}: ${it.b.name}, ${money(it.remaining)} left, ends ${fmtDate(it.p.end)}`);
+  A.credits = [];
+  if (later.length) A.watch.push(`${later.length} more credit${later.length>1?"s":""} worth ${money(later.reduce((s,it)=>s+it.remaining,0))} reset later. See the Benefits tab.`);
+  return A;
+}
+
+function merchantAnswer(q, hits){
+  if (!hits.length) return null;
+  const it = hits[0], b = it.b;
+  const A = { q, pick:b.cardId, title:`Use ${it.card.name} for your ${b.name}`, why:[], watch:[], alts:[], credits:hits.slice(0,4), sources:[b.sourceUrl] };
+  A.why.push(`${b.description} You have ${money(it.remaining)} left for ${it.p.label}, resetting ${fmtDate(it.p.end)}.`);
+  A.why.push(`Eligible: ${b.merchants.join("; ")}.`);
+  A.short = `${money(it.remaining)} left until ${fmtDate(it.p.end)}.`;
+  A.cta = { label:"Track this credit", tab:"tracker", card:b.cardId, benefit:b.id };
+  A.credits = [];
+  if (b.enrollment) A.heads = "Turn it on in your card account first.";
+  if (b.enrollment) A.watch.push("Enrollment or activation is required: " + b.activation);
+  A.watch.push(b.terms);
+  if (/this restaurant|this place|this store|here\b/.test(q)) A.watch.push("I can't check a specific location. Look for it in the merchant's own listing (for Resy, the restaurant page in the Resy app).");
+  if (!b.verified) A.watch.push("This credit isn't confirmed on the issuer's site yet.");
+  if (it.done) A.watch.unshift(`You've already ${it.status === "na" ? "set this credit aside" : "used this credit"} for ${it.p.label}. It resets ${fmtDate(new Date(+it.p.end + DAY), true)}.`);
+  return A;
+}
+
+function loungeAnswer(q){
+  const cards = walletCards().filter(c => c.perks.some(p => /lounge|priority pass/i.test(p.name + p.text)));
+  if (!cards.length) return { q, pick:null, title:"None of your cards include lounge access", short:"Cards like Platinum, Sapphire Reserve and Bilt Palladium do.", why:[], watch:[], alts:[], credits:[], sources:[], cta:{ label:"See card ideas", tab:"explore", goal:"lounges" } };
+  const A = { q, pick:cards[0].id, title: cards.length === 1 ? `${cards[0].name} gets you in` : `${cards.length} of your cards get you in`, why:[], watch:["Access rules depend on the lounge, your airline and guest policies. Check the lounge's app or site before you go."], alts:[], credits:[], sources:cards.map(c=>c.source) };
+  cards.forEach(c => { const p = c.perks.find(p => /lounge|priority pass/i.test(p.name + p.text)); A.why.push(`${c.name}: ${p.text}`); });
+  A.short = cards.length === 1 ? `${cards[0].name} includes lounge access.` : `${cards.slice(0,-1).map(c => c.name).join(", ")} and ${cards[cards.length-1].name} include lounge access.`;
+  A.cta = { label:`See ${cards[0].name} benefits`, tab:"benefits", card:cards[0].id };
+  return A;
+}
+
+function ask(raw){
+  const q = raw.toLowerCase().trim();
+  const NEWCARD = /(card (that|for me|i should)|great (all.?around|everyday)|not a coupon|most value|new card|next card|first card|another card|card (should|to) i (get|open|apply)|should i (get|apply|open)|apply for|sign up for|recommend (a|me a|some) card|which card (should i|to) get|what card (should i|to) get|best card to get|don'?t have a card|no cards?|shopping for a card|cards? to get)/;
+  if (!S.cards.length || NEWCARD.test(q)) return Object.assign(newCardAnswer(q), { q:raw });
+  const named = namedCards(q);
+  let A = null;
+  if (/costco|warehouse club|sam'?s club/.test(q)) A = costcoAnswer(raw);
+  else if (/(expir|reset|still need|left to use|unused|use it or lose|before (jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))/.test(q)) A = expiringAnswer(q);
+  else if (/(insur|cover|coverage|cdw|collision|damage waiver)/.test(q) && /(rental|rent a car|car)/.test(q)) A = rentalAnswer(raw, named);
+  else if (CATS.car_rental.re.test(q)) A = rentalCarAnswer(raw, named);
+  else if (/lounge/.test(q)) A = loungeAnswer(raw);
+  else {
+    const all = allItems();
+    const GENERIC = ["restaurant","hotel","coffee","donut","delivery","rideshare","tickets","concert","gym","streaming","grocery delivery","travel credit","edit"];
+    const credit = all.filter(it => it.b.keywords.some(k => !GENERIC.includes(k) && new RegExp(`\\b${k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}\\b`).test(q)));
+    const cat = Object.keys(CATS).find(k => CATS[k].re.test(q));
+    if (credit.length && (/credit|cash|use my|can i use/.test(q) || !cat)) A = merchantAnswer(raw, credit.sort((a,b)=>b.remaining-a.remaining));
+    else if (cat) A = categoryAnswer(cat, raw, named.length >= 1 && /\bor\b|vs|versus|compare|with/.test(q) ? named : null);
+    else if (/\b(credit|travel credit)\b/.test(q) && named.length) A = expiringAnswer("soon", named);
+  }
+  if (!A){
+    A = categoryAnswer("everyday_fallback", raw);
+    A.heads = "I couldn't match that to a category, so this is your best card for everyday spending.";
+    if (!A.pick) A.heads = "I couldn't match that to a category. None of your cards earn extra on everyday spending.";
+  }
+  A.q = raw; return A;
+}
+CATS.everyday_fallback = { label:"this purchase", re:/$^/ };
+
+/* ---------- 5. VIEWS ----------------------------------------------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const IC = {
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>',
+  card:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/><path d="M7 15h3"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l2 2 4-4"/><path d="M13 7h7"/><path d="M4 16l2 2 4-4"/><path d="M13 16h7"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>',
+  menu:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>',
+  arrow:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  chev:'<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  check:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>',
+  bell:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 003.4 0"/></svg>',
+  back:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+  spark:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="14" height="10" rx="2"/><path d="M7 20h12a2 2 0 002-2V9"/></svg>',
+  plus:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+};
+
+/* Plain-language explanations for perks, keyed by perk name. */
+const SIMPLE = {
+  "The Hotel Collection":"Book 2 or more nights through Amex Travel and the hotel gives you $100 to spend there, like on food or the spa.",
+  "Hertz Five Star® status":"Faster pickup and nicer cars when you rent from Hertz. Turn it on once in your Amex account.",
+  "Trip Delay Insurance":"If your trip gets stuck for 12+ hours, Amex helps pay for food and a hotel, up to $300.",
+  "Baggage Insurance":"If the airline loses or breaks your bag, this helps pay for it.",
+  "Purchase protection & extended warranty":"Break or lose something you just bought? You may get your money back. Warranties also last a year longer.",
+  "No foreign transaction fees":"No extra fee when you buy things in another country.",
+  "Global Lounge Collection":"Free access to quiet airport lounges with snacks, drinks and Wi‑Fi.",
+  "Fine Hotels + Resorts":"Book fancy hotels through Amex and get free breakfast, late checkout and often a better room.",
+  "Hotel status":"Marriott and Hilton treat you like a regular, with perks like room upgrades and late checkout.",
+  "Car rental status":"Skip lines and get small perks at Avis, Hertz and National. Turn it on in your Amex account.",
+  "Global Entry or TSA PreCheck credit":"The card pays your fee to get through airport security and customs faster.",
+  "Trip insurance":"If your trip is delayed or canceled for a covered reason, you can get money back.",
+  "Cell Phone Protection":"Pay your phone bill with this card and a cracked or stolen phone is covered, up to $800.",
+  "Return & purchase protection":"If a store won't take a return, Amex might refund you. New stuff is covered if it breaks or is stolen.",
+  "Lounges":"Free access to Chase and Priority Pass airport lounges, and you can bring two friends.",
+  "IHG One Rewards Platinum Elite":"Better treatment at IHG hotels like Holiday Inn, through 2027. Link your IHG account once.",
+  "Apple TV & Apple Music":"A free year of Apple TV and Apple Music. Turn it on in Chase by June 22, 2027.",
+  "DashPass":"Free delivery on lots of DoorDash orders. Turn it on in the DoorDash app.",
+  "Global Entry, TSA PreCheck or NEXUS":"The card pays your fee to get through airport lines faster, once every 4 years.",
+  "Trip protections":"If a trip goes wrong, like a long delay or a lost bag, Chase helps pay you back.",
+  "Purchase protections":"Stuff you buy is covered for 120 days if it breaks or gets stolen.",
+  "$75,000 spend benefits":"Spend $75,000 in one year and you unlock extra hotel and airline perks.",
+  "Priority Pass":"Free airport lounges for you and two friends.",
+  "Housing rewards":"Earn points when you pay rent or your mortgage, with no fee.",
+  "Point Accelerator":"Trade $200 of Bilt Cash to earn extra points on your next $5,000 of spending.",
+  "Mastercard protections":"Some coverage for rental cars, phones and trips. Check Bilt's guide for the limits.",
+};
+const ORIGINAL = ["amex-gold","amex-plat","csr","bilt-palladium"];
+const RENTAL_SIMPLE = {
+  primary:"If you damage a rental car, this card pays first, so you can skip the rental counter's insurance.",
+  secondary:"If you damage a rental car, this helps after your own car insurance pays.",
+  unknown:"It may cover rental car damage, but we couldn't confirm the details. Check the card's guide before you skip the counter's insurance.",
+  none:"This card doesn't list rental car coverage.",
+};
+
+function cardArt(c, extra = "", tag = "div", attrs = ""){
+  return `<${tag} class="ccard ${c.art} ${extra}" ${attrs}><span class="stamp"></span>
+    <span class="spread" style="position:relative;z-index:1"><span class="issuer">${esc(c.issuer)}</span><span class="chipart"></span></span>
+    <span class="spread" style="position:relative;z-index:1;align-items:flex-end"><span class="cname">${esc(c.name)}</span><span class="net">${esc(c.network)}</span></span></${tag}>`;
+}
+function miniCard(c){ return `<span class="mini ${c.art}" aria-hidden="true"></span>`; }
+
+function renderTabbar(){
+  const tb = $("#tabbar"); tb.hidden = !S.cards.length || ui.tab === "explore"; document.body.classList.toggle("no-tabs", tb.hidden);
+  const tabs = [["home","Home",IC.home],["tracker","Tracker",IC.list],["benefits","Benefits",IC.card],["settings","Settings",IC.gear]];
+  tb.innerHTML = `<nav aria-label="Main">${tabs.map(([k,l,i]) => `<button class="tab ${ui.tab===k?"on":""}" data-act="tab" data-tab="${k}" aria-current="${ui.tab===k?"page":"false"}"><span class="tab-ic">${i}</span>${l}</button>`).join("")}</nav>`;
+}
+const LOGO = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="3.5"/><path d="M3.5 8.5h17"/><path d="M3.5 11.5Q12 18.5 20.5 11.5"/></svg>';
+function header(right){ return `<header class="top"><div class="brand"><span class="brand-mark">${LOGO}</span>vault.</div>${right || ""}</header>`; }
+function cardToggle(only){
+  const list = only ? S.cards.filter(i => only.includes(i.id)) : S.cards;
+  if (!ui.card || !list.some(c => c.id === ui.card)) ui.card = list[0] && list[0].id;
+  return `<div class="toggle" role="tablist" aria-label="Choose a card">${list.map(i => { const c = cardById(i.id); return `<button role="tab" aria-selected="${i.id===ui.card}" class="tg ${i.id===ui.card?"on":""}" data-act="select-card" data-id="${i.id}">${miniCard(c)}${esc(c.name)}</button>`; }).join("")}</div>`;
+}
+
+/* ---- Onboarding */
+function onbRows(){
+  const q = (ui.onbQ || "").toLowerCase();
+  const list = CARDS.filter(c => !q || (c.fullName + " " + c.issuer + " " + c.aliases.join(" ")).toLowerCase().includes(q));
+  return list.map(c => { const on = ui.picks.includes(c.id); return `<button class="item pad pick-row ${on?"on":""}" data-act="pick" data-id="${c.id}" aria-pressed="${on}">${miniCard(c)}<span class="grow"><span class="item-title">${esc(c.name)}</span><span class="item-sub">${esc(c.issuer)} · ${c.annualFee ? money(c.annualFee) + "/yr" : "No annual fee"}</span></span><span class="check ${on?"on":""}">${on ? IC.check : ""}</span></button>`; }).join("") || `<div class="empty">No match yet. More cards are coming.</div>`;
+}
+function renderOnboarding(){
+  return `
+  <section class="stack-lg" style="margin-top:22px">
+    <div class="launch"><span class="launch-mark">${LOGO.replace('width="16" height="16"','width="38" height="38"')}</span><div class="launch-name">vault.</div><p class="muted" style="margin:0">More value from every card.</p></div>
+    <div class="stack" style="gap:8px"><h1 class="h1">Which cards do you have?</h1>
+      <p class="muted" style="margin:0">Tap the ones in your wallet. No card numbers needed.</p></div>
+    <input class="input" id="onb-search" data-act="onb-search" placeholder="Search cards" value="${esc(ui.onbQ||"")}" aria-label="Search cards">
+    <div class="list" id="onb-list">${onbRows()}</div>
+    <div class="stack">
+      <button class="btn btn-accent btn-block" data-act="finish-onboarding" ${ui.picks.length?"":"disabled"}>${ui.picks.length ? `Add ${ui.picks.length} card${ui.picks.length>1?"s":""}` : "Pick at least one card"}</button>
+      <button class="btn btn-ghost btn-block" data-act="open-explore" data-goal="">I don't have a card yet</button>
+      <button class="link" style="align-self:center" data-act="example">Just looking? Try an example wallet</button>
+    </div>
+  </section>`;
+}
+
+/* ---- Home */
+const COMMON_QS = [
+  "What's my best travel card?",
+  "Which card should I use for dining?",
+  "What's my best card for groceries?",
+  "Which card is best for Amazon?",
+  "Which card should I use at Costco?",
+  "Which card should I use for gas?",
+  "Which card earns the most points on flights?",
+  "Does my card cover rental cars?",
+  "Which cards get me into airport lounges?",
+  "What benefits expire this month?",
+];
+function greeting(){ const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"; }
+
+function renderHome(){
+  const due = allItems().filter(it => !it.done && it.days <= S.settings.reminderDays);
+  const dueAmt = due.reduce((s,it) => s + it.remaining, 0);
+  return `${header(`<button class="icon-btn" data-act="menu" aria-label="Menu">${IC.menu}</button>`)}
+  <section class="home">
+    <p class="hello">${greeting()}${S.example ? ` <span class="pill warm">Example data</span>` : ""}</p>
+    <div class="ask">
+      <h1 class="ask-q"><label for="ask-input">What card info do you need?</label></h1>
+      <form class="ask-form" data-form="ask" autocomplete="off">
+        <input id="ask-input" name="q" placeholder="Best travel card, Amazon…" value="${esc(ui.lastQ || "")}" enterkeyhint="search">
+        <button class="ask-go" aria-label="Ask">${IC.arrow}</button>
+      </form>
+      <div class="qmenu">
+        <button class="qmenu-btn" data-act="qmenu" aria-expanded="${!!ui.qmenu}" aria-controls="qmenu-list">Or pick a common question ${IC.chev}</button>
+        <div class="qmenu-list" id="qmenu-list" ${ui.qmenu ? "" : "hidden"}>${COMMON_QS.map(q => `<button data-act="ask-chip" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>
+      </div>
+    </div>
+    <button class="row-link subtle" data-act="open-explore" data-goal="">${IC.spark}<span class="grow">Shopping for a new card?</span>${IC.arrow}</button>
+    ${S.settings.banner && due.length ? `<button class="due" data-act="tab" data-tab="tracker">${IC.bell}<span class="grow"><b>${due.length} credit${due.length>1?"s":""}</b> worth ${money(dueAmt)} end soon</span>${IC.arrow}</button>` : ""}
+    <div id="answer">${ui.answer ? renderAnswer(ui.answer) : ""}</div>
+  </section>`;
+}
+
+function renderAnswer(A){
+  const card = A.pick ? cardById(A.pick) : null;
+  const more = [...A.why.slice(A.short ? 0 : 1)];
+  const hasMore = more.length || A.alts.length || A.watch.length || A.sources.length;
+  return `<article class="answer" tabindex="-1" id="answer-card">
+    <div class="pick">${card ? miniCard(card).replace("mini", "mini big") : ""}
+      <div class="grow"><h2 class="pick-name">${esc(A.title)}</h2>${A.short ? `<p class="pick-why">${esc(A.short)}</p>` : ""}</div></div>
+    ${A.extra ? `<p class="answer-line">${esc(A.extra)}</p>` : ""}
+    ${A.heads ? `<p class="answer-line heads"><b>Heads up:</b> ${esc(A.heads)}</p>` : ""}
+    ${A.upsell ? `<p class="answer-line upsell">Not in your wallet: ${esc(A.upsell.text)} <button class="link" data-act="open-explore" data-goal="${A.upsell.goal}">Card ideas</button></p>` : ""}
+    ${A.suggest ? `<div class="stack" style="gap:8px">${COMMON_QS.slice(0,4).map(q => `<button class="chip" data-act="ask-chip" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>` : ""}
+    ${A.cta || hasMore ? `<div class="answer-foot">
+      ${A.cta ? `<button class="btn btn-primary btn-small" data-act="cta" data-tab="${A.cta.tab}" data-card="${A.cta.card||""}" data-benefit="${A.cta.benefit||""}" data-goal="${A.cta.goal||""}" data-q="${esc(A.cta.q||"")}">${esc(A.cta.label)} ${IC.arrow}</button>` : "<span></span>"}
+      <button class="link small" data-act="clear-answer">Clear</button></div>` : ""}
+    ${hasMore ? `<details class="more"><summary>More details ${IC.chev}</summary><div class="stack" style="gap:12px;padding-top:10px">
+      ${more.length ? `<ul class="why">${more.map(w => `<li>${esc(w)}</li>`).join("")}</ul>` : ""}
+      ${A.alts.length ? `<div><div class="subhead">Your other cards</div>${A.alts.map(a => `<div class="alt-row"><b>${esc(a.card.name)}</b> · ${esc(a.text)}${a.note ? ` <span class="muted">(${esc(a.note)})</span>` : ""}</div>`).join("")}</div>` : ""}
+      ${A.watch.length ? `<ul class="why watch">${A.watch.map(w => `<li>${esc(w)}</li>`).join("")}</ul>` : ""}
+      ${A.sources.length ? `<p class="src">Source: ${[...new Set(A.sources)].map(u => `<a href="${u}" target="_blank" rel="noopener">${new URL(u).hostname.replace("www.","")}</a>`).join(", ")}</p>` : ""}
+    </div></details>` : ""}
+  </article>`;
+}
+
+/* ---- Tracker */
+function quickRow(it){
+  const sub = it.status === "partial" ? `${money(it.used)} of ${money(it.p.value)} used` : it.status === "used" ? "Used" : it.status === "na" ? "Not for me" : money(it.p.value);
+  const glyph = it.status === "used" ? `<span class="check on">${IC.check}</span>` : it.status === "na" ? `<span class="check na"></span>` : it.status === "partial" ? `<span class="check part" style="--p:${Math.round(it.used/it.p.value*100)}%"></span>` : `<span class="check"></span>`;
+  return `<div class="item">
+    <button class="check-btn" data-act="quick" data-id="${it.b.id}" aria-label="${it.status==="used" ? "Mark not used" : "Mark used"}: ${esc(it.b.name)}">${glyph}</button>
+    <button class="item-main" data-act="open-benefit" data-id="${it.b.id}">
+      <span class="grow"><span class="item-title">${esc(it.b.name)}</span><span class="item-sub num">${sub}${it.done ? "" : ` · ends ${fmtDate(it.p.end)}`}</span></span>
+      ${it.done ? `<span class="pill done">${it.status === "na" ? "Skipped" : "Done"}</span>` : `<span class="pill due-pill num">${it.days === 0 ? "Today" : it.days + "d"}</span>`}
+    </button></div>`;
+}
+
+function trackableIds(t){ return S.cards.filter(i => BENEFITS.some(b => b.cardId === i.id && itemFor(b, i, t))).map(i => i.id); }
+function renderTracker(){
+  const t = now(), ids = trackableIds(t);
+  if (!ids.length) return `${header()}
+  <section class="stack-lg" style="margin-top:14px">
+    <h1 class="h1">Tracker</h1>
+    <div class="note">None of your cards have credits you need to use up. Their value comes from what you earn on every purchase.</div>
+    <button class="row-link" data-act="tab" data-tab="benefits"><span class="grow">See what your cards are best for</span>${IC.arrow}</button>
+  </section>`;
+  const toggle = cardToggle(ids);
+  const c = cardById(ui.card), inst = S.cards.find(i => i.id === ui.card);
+  const items = BENEFITS.filter(b => b.cardId === c.id).map(b => itemFor(b, inst, t)).filter(Boolean);
+  const win = Math.max(S.settings.reminderDays, 3);
+  const open = items.filter(it => !it.done), done = items.filter(it => it.done);
+  const soon = open.filter(it => it.days <= win).sort((a,b) => a.days - b.days);
+  const rest = open.filter(it => it.days > win);
+  const by = f => rest.filter(it => it.b.frequency === f).sort((a,b) => a.p.end - b.p.end);
+  const counted = items.filter(it => it.status !== "na");
+  const possible = counted.reduce((s,it) => s + it.p.value, 0), used = counted.reduce((s,it) => s + it.used, 0);
+  const left = open.reduce((s,it) => s + it.remaining, 0);
+  const tot = list => { const l = list.filter(it => it.status !== "na"); return `${money(l.reduce((s,it) => s + it.used, 0))} / ${money(l.reduce((s,it) => s + it.p.value, 0))}`; };
+  const allBy = f => items.filter(it => it.b.frequency === f);
+  const sec = (title, list, freq) => list.length ? `<section><div class="sec-row"><h2 class="sec">${title}</h2><span class="sec-tot num">${tot(freq ? allBy(freq) : list)}</span></div><div class="list">${list.map(quickRow).join("")}</div></section>` : "";
+  if (!items.length) return `${header()}
+  <section class="stack-lg" style="margin-top:14px">
+    <div class="stack" style="gap:12px"><h1 class="h1">Tracker</h1>${toggle}</div>
+    <div class="note">${esc(c.name)} has no credits to track. Its value comes from ${c.cash ? "cash back" : "points"} on what you buy.</div>
+    <button class="row-link" data-act="cta" data-tab="benefits" data-card="${c.id}"><span class="grow">See what ${esc(c.name)} is best for</span>${IC.arrow}</button>
+  </section>`;
+  return `${header()}
+  <section class="stack-lg" style="margin-top:14px">
+    <div class="stack" style="gap:12px"><h1 class="h1">Tracker</h1>${toggle}</div>
+    <div class="summary">
+      <p class="lede num">${open.length ? `<b>${money(left)}</b> left to use` : `<b>All caught up</b>`}</p>
+      <p class="small muted num" style="margin:0">${money(used)} used of ${money(possible)} available this period</p>
+      <div class="meter" style="height:8px"><i style="width:${possible ? Math.round(used/possible*100) : 0}%"></i></div>
+    </div>
+    ${sec("Ending soon", soon)}
+    ${sec(`This month`, by("monthly"), "monthly")}
+    ${sec(`This quarter`, by("quarterly"), "quarterly")}
+    ${sec(`This half-year`, by("semiannual"), "semiannual")}
+    ${sec(`This year`, by("annual"), "annual")}
+    ${done.length ? `<details class="done-d" id="done-d" ${ui.doneClosed ? "" : "open"}><summary>Done (${done.length}) ${IC.chev}</summary><div class="list" style="margin-top:10px">${done.map(quickRow).join("")}</div></details>` : ""}
+    <p class="small muted" style="text-align:center;margin:0">Tap the circle to check off a credit. Tap the name to see more.</p>
+  </section>`;
+}
+
+/* ---- Benefits (card overview) */
+function nextRenewal(inst, t){
+  const od = parse(inst.openedDate); if (!od) return null;
+  let r = new Date(t.getFullYear(), od.getMonth(), od.getDate()); if (r < t) r = new Date(t.getFullYear()+1, od.getMonth(), od.getDate());
+  return r;
+}
+function savedThisYear(cardId, t){ return feeStats(cardId, t).redeemed; }
+function stillAvailable(cardId, t){
+  const inst = S.cards.find(i => i.id === cardId); let total = 0;
+  BENEFITS.filter(b => b.cardId === cardId).forEach(b => {
+    const it = itemFor(b, inst, t); if (!it) return;
+    total += it.remaining; const seen = new Set([it.p.key]);
+    for (let m = t.getMonth()+1; m < 12 && b.cycle !== "anniversary"; m++){
+      const p = periodOf(b, inst, new Date(t.getFullYear(), m, 1));
+      if (p && !seen.has(p.key)){ seen.add(p.key); const r = (S.tracking[b.id]||{})[p.key]; total += r && r.status === "na" ? 0 : p.value; }
+    }
+  });
+  return total;
+}
+
+function renderBenefits(){
+  const t = now(); cardToggle();
+  const c = cardById(ui.card), inst = S.cards.find(i => i.id === ui.card);
+  const renew = nextRenewal(inst, t), renewDays = renew ? daysUntil(renew, t) : null;
+  const credits = BENEFITS.filter(b => b.cardId === c.id && periodOf(b, inst, t));
+  const seen = new Set();
+  const rules = [...c.earn].filter(r => ruleLive(r) && (!r.choice || (inst.choice || "gas") === r.choice)).sort((a,b) => b.mult - a.mult).filter(r => { const k = r.mult + r.text; if (seen.has(k)) return false; seen.add(k); return true; });
+  return `${header(`<button class="btn btn-small" data-act="add-card">${IC.plus} Add card</button>`)}
+  <section class="stack-lg" style="margin-top:14px">
+    <div class="stack" style="gap:12px"><h1 class="h1">Benefits</h1>${cardToggle()}</div>
+    <div class="carousel" id="carousel">${S.cards.map(i => cardArt(cardById(i.id), i.id===ui.card ? "sel" : "", "button", `data-act="select-card" data-id="${i.id}" aria-label="${esc(cardById(i.id).name)}"`)).join("")}</div>
+    ${renew && renewDays <= 45 ? `<div class="due static">${IC.bell}<span class="grow">Your ${money(c.annualFee)} fee renews <b>${fmtDate(renew)}</b>. Good time to decide if it's worth keeping.</span></div>` : ""}
+    ${c.closed ? `<div class="note">American Express has closed this card to new applicants. Your card still works.</div>` : ""}
+    <div class="facts">
+      ${c.annualFee ? `<div class="fact"><span>Renews</span>${renew ? `<b>${fmtDate(renew, true)}</b>` : `<button class="link" data-act="edit-opened" data-id="${c.id}">Add date</button>`}</div>` : `<div class="fact"><span>Card type</span><b>${c.cash ? "Cash back" : "Points"}</b></div>`}
+      <div class="fact"><span>Annual fee</span><b class="num">${c.annualFee ? money(c.annualFee) : "None"}</b>${c.feeNote ? `<span>${esc(c.feeNote)}</span>` : ""}</div>
+      ${credits.length ? `<div class="fact"><span>Saved in ${t.getFullYear()}</span><b class="num">${money(savedThisYear(c.id, t))}</b></div>
+      <div class="fact"><span>Still up for grabs</span><b class="num accent">${money(stillAvailable(c.id, t))}</b></div>` : `<div class="fact"><span>Everyday rate</span><b class="num accent">${xr(c.base, c)}</b></div><div class="fact"><span>Network</span><b>${esc(c.network)}</b></div>`}
+    </div>
+    ${c.choiceCard ? `<label class="choice-row" for="choice-sel"><span class="grow"><b>Your 3% category</b><span class="item-sub">Change it in your Bank of America app too</span></span><select id="choice-sel" class="input" data-act="choice" data-id="${c.id}" style="width:100%">${Object.entries(CHOICES).map(([k,v]) => `<option value="${k}" ${(inst.choice||"gas")===k?"selected":""}>${v}</option>`).join("")}</select></label>` : ""}
+    <section><h2 class="sec">Best for</h2>
+      <div class="card-box">${rules.map(r => `<div class="earn"><span class="x num">${xr(r.mult, c)}</span><span class="grow">${esc(r.text)}${r.cap ? `<span class="item-sub">${esc(r.cap)}</span>` : ""}</span></div>`).join("")}
+      <div class="earn"><span class="x num">${xr(c.base, c)}</span><span class="grow">${esc(c.baseText || "everything else")}</span></div></div></section>
+    ${credits.length ? `<section><h2 class="sec">Credits</h2>
+      <div class="card-box">${credits.map(b => `<details class="perk-d"><summary><span class="grow"><b>${esc(b.name)}</b> <span class="muted num">${money(b.annualValue)}/yr</span></span>${IC.chev}</summary>
+        <div class="perk-body"><p>${esc(b.description)}</p><button class="link small" data-act="cta" data-tab="tracker" data-card="${c.id}" data-benefit="${b.id}">Track it</button></div></details>`).join("")}</div></section>` : ""}
+    <section><h2 class="sec">Card perks</h2>
+      <div class="card-box">${c.perks.map(p => `<details class="perk-d"><summary><b class="grow">${esc(p.name)}</b>${IC.chev}</summary><div class="perk-body"><p>${esc((ORIGINAL.includes(c.id) && SIMPLE[p.name]) || p.text)}</p></div></details>`).join("")}
+        <details class="perk-d"><summary><b class="grow">Rental car coverage</b>${IC.chev}</summary><div class="perk-body"><p>${esc(RENTAL_SIMPLE[c.rental.level])}</p></div></details></div></section>
+    ${renderBonus(c, inst)}
+    <div class="spread small"><a href="${c.source}" target="_blank" rel="noopener">Issuer's benefits page</a><button class="link" style="color:var(--bad)" data-act="remove-card" data-id="${c.id}">Remove card</button></div>
+  </section>`;
+}
+
+function renderBonus(c, inst){
+  const b = inst.bonus, t = now();
+  if (!b) return `<button class="row-link" data-act="bonus-edit" data-id="${c.id}"><span class="grow"><b>Signup bonus</b><span class="small muted" style="display:block">Track your spending goal</span></span>${IC.plus}</button>`;
+  const pct = Math.min(100, Math.round(+b.spent / +b.required * 100) || 0);
+  const dl = parse(b.deadline), d = dl ? daysUntil(dl, t) : null, met = +b.spent >= +b.required;
+  return `<section class="bonus">
+    <div class="spread"><h2 class="sec" style="margin:0">Signup bonus</h2><button class="link small" data-act="bonus-edit" data-id="${c.id}">Edit</button></div>
+    <p class="num" style="margin:0"><b style="font-size:1.25rem">${money(+b.spent)}</b> <span class="muted">/ ${money(+b.required)}</span></p>
+    <div class="meter ${met?"good":""}" style="height:10px"><i style="width:${pct}%"></i></div>
+    <p class="small muted num" style="margin:0">${met ? "Goal met! The bonus usually posts after your statement closes." : `${pct}% done${d === null ? "" : d < 0 ? " · deadline passed" : ` · ${d} days left`}`}</p>
+    ${met ? "" : `<form class="row-flex" data-form="bonus-add" data-id="${c.id}"><div class="money grow"><span>$</span><input id="bonus-add-${c.id}" name="amt" inputmode="decimal" placeholder="Add a purchase" aria-label="Add spending"></div><button class="btn btn-small btn-primary">Add</button></form>`}
+  </section>`;
+}
+
+/* ---- Find a card (explore) */
+const GOALS = {
+  everyday:{ label:"Everyday spending", list:[
+    ["robinhood-gold","3% back on everything, but you need Robinhood Gold (about $50 a year)."],
+    ["bilt-palladium","2x on everyday purchases plus points on rent, Priority Pass and $400 in hotel credits."],
+    ["double-cash","2% back on everything, no annual fee."],
+    ["active-cash","2% back on everything, no annual fee, plus phone protection."],
+    ["venture","2x miles on everything for $95, good if you want travel rewards."],
+    ["apple-card","2% with Apple Pay and 3% at Apple and some partners. No fees at all."],
+    ["cfu","1.5% on everything and 3% on dining, no annual fee."],
+    ["quicksilver","1.5% back on everything, no annual fee."],
+    ["bofa-unlimited","1.5% back on everything, more if you bank with Bank of America."] ] },
+  dining:{ label:"Dining & groceries", list:[
+    ["amex-gold","4x at restaurants and U.S. supermarkets, plus monthly dining and Uber credits."],
+    ["savor","3% on dining, groceries and entertainment, no annual fee."],
+    ["bofa-custom","3% in a category you pick, like dining, and 2% at grocery stores. No annual fee."],
+    ["csp","3x on dining and online groceries for a $95 fee."],
+    ["cfu","3% on dining and drugstores, 1.5% on everything else, no annual fee."],
+    ["csr","3x on dining worldwide and up to $300 a year at Exclusive Tables restaurants."],
+    ["bilt-palladium","Up to 5x at Bilt partner restaurants and 2x on everything else."] ] },
+  travel:{ label:"Travel", list:[
+    ["csp","The classic first travel card: 3x dining, 2x travel and primary rental car coverage for $95."],
+    ["venture-x","2x on everything, a $300 travel credit and lounges. The credits nearly cover the $395 fee."],
+    ["csr","8x through Chase Travel, a $300 travel credit, lounges and primary rental car coverage."],
+    ["amex-plat","5x on flights, the biggest lounge network and up to $600 in hotel credits."],
+    ["venture","2x miles on everything for $95, simple and flexible."],
+    ["bofa-premium","2x on travel and dining, 1.5x on everything else, plus a $100 airline fee credit for $95."],
+    ["bofa-travel","1.5x points on everything with no annual fee and no foreign transaction fees."],
+    ["bilt-palladium","2x on all travel, Priority Pass and $400 in Bilt Travel hotel credits."] ] },
+  lounges:{ label:"Airport lounges", list:[
+    ["venture-x","Capital One Lounges and Priority Pass for the lowest fee of the lounge cards."],
+    ["amex-plat","Centurion Lounges, Delta Sky Clubs on Delta flights and Priority Pass."],
+    ["csr","Chase Sapphire Lounges and Priority Pass, each with two guests."],
+    ["bilt-palladium","Priority Pass for you and two guests."],
+    ["bofa-elite","Priority Pass memberships for you and up to 3 others, plus $450 a year in credits."] ] },
+  shopping:{ label:"Amazon & shopping", list:[
+    ["prime-visa","5% back at Amazon and Whole Foods with Prime, no annual fee."],
+    ["costco-citi","2% at Costco, 4% on gas and 3% on dining and travel. Needs a Costco membership."],
+    ["apple-card","3% at Apple and select stores with Apple Pay, 2% everywhere else with Apple Pay."],
+    ["robinhood-gold","3% everywhere, including Amazon, with Robinhood Gold."],
+    ["double-cash","2% back everywhere, no annual fee."] ] },
+  gas:{ label:"Gas", list:[
+    ["costco-citi","4% on gas (5% at Costco gas) on up to $7,000 a year."],
+    ["csp","3x at gas stations and EV charging for a $95 fee."],
+    ["apple-card","3% at Exxon Mobil with Apple Pay, no fees."],
+    ["prime-visa","2% at gas stations, no annual fee."],
+    ["bofa-custom","3% on gas if you pick it as your category, no annual fee."] ] },
+  rent:{ label:"Rent or mortgage", list:[
+    ["bilt-palladium","Earns points on rent and mortgage with no transaction fee. Most cards earn nothing on rent."] ] },
+  lowfee:{ label:"No annual fee", list:[
+    ["double-cash","2% back on everything."],
+    ["active-cash","2% back on everything, plus phone protection."],
+    ["savor","3% on dining, groceries and entertainment."],
+    ["cfu","1.5% on everything and 3% on dining."],
+    ["flex","5% in rotating categories each quarter, 3% on dining."],
+    ["prime-visa","5% at Amazon and Whole Foods with Prime."],
+    ["discover-it","5% in rotating categories, and Discover doubles your first year of cash back."],
+    ["bofa-custom","3% in a category you pick and 2% at grocery stores."],
+    ["bofa-travel","1.5x points on everything and no foreign transaction fees."],
+    ["apple-card","2% with Apple Pay and no fees of any kind."] ] },
+};
+function rankGoal(g){ const G = GOALS[g] || GOALS.everyday; return G.list.map(([id, why]) => ({ c:cardById(id), why, owned:S.cards.some(i => i.id === id) })).filter(x => x.c && !x.c.closed); }
+
+/* ---- Card finder: turns a typed request into a ranked pick ---- */
+function cardFeatures(c){
+  const credits = BENEFITS.filter(b => b.cardId === c.id && !b.startsOn && b.type !== "points").reduce((s,b) => s + b.annualValue, 0);
+  const creditCount = BENEFITS.filter(b => b.cardId === c.id && !b.startsOn).length;
+  const m = cat => bestRule(c, cat, true).main.mult;
+  return { c, fee:c.annualFee, base:c.baseEffective || c.base, credits, creditCount, m,
+    lounge:c.perks.some(p => /lounge|priority pass/i.test(p.name + " " + p.text)),
+    primary:c.rental.level === "primary", noFX:!c.fxFee && c.network !== "Discover",
+    travel:Math.max(m("flights"), m("hotels")) };
+}
+const rate = (f, mult) => `${xr(mult, f.c)}${f.c.cash ? "" : " points"}`;
+const INTENTS = [
+  { id:"simple", label:"simple, all-around", re:/(simple|all.?around|all.?purpose|coupon|no tracking|track|set it and forget|easy|flat|everything|everyday|one card|low.?maintenance|hassle|straightforward)/,
+    score:f => f.base*3 - f.creditCount*0.5 - f.fee/200, why:f => `${rate(f, f.c.base)} on ${f.c.baseEffective ? "everything with Apple Pay" : "everything"}, so there's nothing to track` },
+  { id:"value", label:"most value from benefits", re:/(most value|benefits|perks|credits|luxury|premium|best value|get the most|worth|lifestyle)/,
+    score:f => (f.credits - f.fee)/250 + (f.lounge ? 1.5 : 0) + f.base*0.4, why:f => f.credits ? `Up to ${money(f.credits)} a year in credits for a ${f.fee ? money(f.fee) : "$0"} fee` : `${rate(f, f.base)} on everything` },
+  { id:"travel", label:"travel", re:/\b(travel\w*|trips?|flights?|fly|flying|vacations?|hotels?|airlines?|points|miles)\b/,
+    score:f => f.travel*0.6 + f.base*0.5 + (f.primary ? 2 : 0) + (f.lounge ? 1 : 0) + (f.noFX ? 1 : -3) - f.fee/400, why:f => [f.travel > f.base ? `${rate(f, f.travel)} on travel` : null, f.primary ? "primary rental car coverage" : null, f.lounge ? "airport lounges" : null].filter(Boolean).join(", ").replace(/^./, x => x.toUpperCase()) || `${rate(f, f.base)} on everything, including travel` },
+  { id:"abroad", label:"spending abroad", re:/(abroad|international|overseas|foreign|europe|japan|mexico|study abroad)/,
+    score:f => f.noFX ? 2 : -5, why:f => f.noFX ? "No foreign transaction fees" : "Charges a fee abroad" },
+  { id:"nofee", label:"no annual fee", re:/(no (annual )?fee|free card|cheap|student|first card|first credit|beginner|starter|build(ing)? credit|college|broke|low fee|young|teen)/,
+    score:f => f.fee === 0 ? 3 + f.base*0.5 : -f.fee/80, why:f => f.fee ? `${money(f.fee)} annual fee` : `No annual fee, and ${rate(f, f.c.base)} on everyday purchases` },
+  { id:"dining", label:"dining", re:/\b(dining|dine|restaurants?|food|foodie|eat|eating|eat out|takeout|coffee)\b/,
+    score:f => f.m("dining")*1.2, why:f => `${rate(f, f.m("dining"))} on dining` },
+  { id:"groceries", label:"groceries", re:/\b(grocer\w*|supermarkets?|whole foods|trader joe'?s)\b/,
+    score:f => f.m("groceries")*1.3, why:f => `${rate(f, f.m("groceries"))} at grocery stores` },
+  { id:"amazon", label:"Amazon", re:/(amazon|whole foods|prime)/, score:f => f.m("amazon")*1.3, why:f => `${rate(f, f.m("amazon"))} at Amazon` },
+  { id:"shopping", label:"shopping", re:/\b(shopping|online|target|walmart|clothes)\b/, score:f => Math.max(f.m("online"), f.base)*1.1, why:f => `${rate(f, Math.max(f.m("online"), f.base))} on shopping` },
+  { id:"gas", label:"gas", re:/(\bgas\b|\bcommut\w*|\bdriv\w*|road trip|\bcars?\b|\bfuel\b)/, score:f => f.m("gas")*1.2, why:f => `${rate(f, f.m("gas"))} on gas` },
+  { id:"rent", label:"rent", re:/\b(rent|mortgage|housing|apartment)\b/, score:f => f.c.id === "bilt-palladium" ? 6 : 0, why:f => f.c.id === "bilt-palladium" ? "Earns points on rent with no fee" : "Doesn't earn on rent" },
+  { id:"lounge", label:"airport lounges", re:/\b(lounges?|airports?)\b/, score:f => f.lounge ? 3 : -1, why:f => f.lounge ? "Airport lounge access" : "No lounge access" },
+  { id:"cash", label:"cash back", re:/\b(cash ?back|cash)\b/, score:f => f.c.cash ? 1.5 : 0, why:f => f.c.cash ? "Pays you in cash back" : "Earns points" },
+  { id:"apple", label:"Apple", re:/(apple|iphone)/, score:f => f.m("apple")*1.2, why:f => `${rate(f, f.m("apple"))} at Apple` },
+  { id:"costco", label:"Costco", re:/costco|wholesale/, score:f => (f.c.network === "Visa" ? 1 : -3) + f.m("costco")*1.5, why:f => f.c.network === "Visa" ? `${rate(f, f.m("costco"))} at Costco` : "Not accepted at Costco" },
+];
+const ISSUERS = [["chase",/chase/],["american express",/amex|american express/],["capital one",/capital one/],["bank of america",/bank of america|bofa/],["citi",/\bciti\b/],["wells fargo",/wells/],["discover",/discover/],["apple",/apple card/],["robinhood",/robinhood/],["bilt",/bilt/]];
+
+function matchCards(text, opts = {}){
+  const q = String(text || "").toLowerCase();
+  let intents = INTENTS.filter(i => i.re.test(q));
+  if (/coupon|not a lot of credits|no credits|don'?t want to track/.test(q)) intents = intents.filter(i => i.id !== "value");
+  const issuer = ISSUERS.filter(([,re]) => re.test(q)).map(([n]) => n);
+  const generic = !intents.length;
+  if (generic) intents = INTENTS.filter(i => i.id === "simple" || i.id === "value");
+  const avoidFee = /no (annual )?fee|free card|cheap|student|first card|broke|beginner|starter|college/.test(q);
+  const owned = new Set(S.cards.map(i => i.id));
+  const scored = CARDS.filter(c => !c.closed).map(c => {
+    const f = cardFeatures(c);
+    let s = 0; const parts = intents.map(i => { const v = i.score(f); s += v; return { i, v }; });
+    if (issuer.length) s += issuer.includes(c.issuer.toLowerCase()) ? 4 : -1;
+    if (avoidFee && c.annualFee > 0) s -= 4;
+    return { c, f, s, parts, owned:owned.has(c.id) };
+  }).sort((a,b) => b.s - a.s);
+  const pool = scored.filter(x => !x.owned);
+  const top = pool[0] || scored[0];
+  const alt = pool.find(x => x !== top && (x.c.issuer !== top.c.issuer || x.c.annualFee !== top.c.annualFee));
+  const reasons = top ? top.parts.sort((a,b) => b.v - a.v).slice(0, 3).map(p => p.i.why(top.f)).filter((v,i,a) => v && a.indexOf(v) === i) : [];
+  return { intents, generic, issuer, top, alt, reasons, others:pool.filter(x => x !== top && x !== alt).slice(0, 4), ownedBest:scored[0] && scored[0].owned ? scored[0] : null };
+}
+
+/* One-line comparison of an alternative against the top pick. */
+function compareCards(alt, top){
+  const a = cardFeatures(alt), t = cardFeatures(top), bits = [], gives = [];
+  if (a.base !== t.base) bits.push(`earns ${rate(a, alt.base)} instead of ${rate(t, top.base)} on everyday purchases`);
+  if (a.fee !== t.fee) bits.push(a.fee ? `costs ${money(a.fee)} a year${t.fee ? ` instead of ${money(t.fee)}` : ""}` : "has no annual fee");
+  if (a.lounge && !t.lounge) gives.push("airport lounges");
+  if (alt.id === "bilt-palladium" && top.id !== "bilt-palladium") gives.push("points on rent");
+  if (a.credits > t.credits + 50) gives.push(`up to ${money(a.credits)} a year in credits`);
+  if (a.primary && !t.primary) gives.push("primary rental car coverage");
+  if (a.noFX && !t.noFX) gives.push("no foreign transaction fees");
+  let s = `${alt.name} ${bits.join(" and ")}`.trim();
+  if (gives.length) s += `${bits.length ? ", but adds " : " adds "}${gives.join(", ")}`;
+  const need = !alt.feeNote && top.feeNote ? `doesn't need ${top.feeNote.replace(/^needs /, "").replace(/^(?!a )/, "a ")}` : "";
+  if (need) s += s === alt.name ? ` ${need}` : `, and ${need}`;
+  if (s === alt.name){
+    const plus = [a.noFX ? "no foreign transaction fees" : null, a.fee ? null : "no annual fee", alt.caveats ? null : null].filter(Boolean);
+    s = `${alt.name} is a close second: ${rate(a, a.base)} ${alt.baseText ? alt.baseText.replace(/^points /, "") : "on everything"}${plus.length ? `, ${plus.join(", ")}` : ""}`;
+  }
+  return s + ".";
+}
+
+const videoLinks = c => { const q = encodeURIComponent(`${c.fullName.replace(/®|™/g, "")} review`); return { yt:`https://www.youtube.com/results?search_query=${q}`, tt:`https://www.tiktok.com/search?q=${q}` }; };
+
+function renderRec(top, why, alt, altWhy, label){
+  const c = top.c, yearly = BENEFITS.filter(b => b.cardId === c.id && periodOf(b, null, now())).reduce((s,b) => s + b.annualValue, 0), v = videoLinks(c);
+  return `<article class="rec">
+    <span class="eyebrow">${esc(label || "Top pick for you")}</span>
+    ${cardArt(c, "rec-art")}
+    <div class="stack" style="gap:4px"><h2 class="h2">${esc(c.fullName)}</h2>${Array.isArray(why) ? `<ul class="why">${why.map(w => `<li>${esc(w)}</li>`).join("")}</ul>` : `<p style="margin:0">${esc(why)}</p>`}</div>
+    <div class="facts"><div class="fact"><span>Annual fee</span><b class="num">${c.annualFee ? money(c.annualFee) : "None"}</b>${c.feeNote ? `<span>${esc(c.feeNote)}</span>` : ""}</div><div class="fact"><span>${yearly ? "Credits per year" : "Everyday rate"}</span><b class="num">${yearly ? `up to ${money(yearly)}` : xr(c.base, c)}</b></div></div>
+    ${c.caveats && c.caveats.length ? `<div class="good-know"><div class="subhead">Good to know</div><ul class="why">${c.caveats.map(w => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}
+    <div class="row-flex"><a class="btn btn-primary grow" href="${c.source}" target="_blank" rel="noopener">See offer</a><button class="btn grow" data-act="add" data-id="${c.id}">I have it</button></div>
+    <p class="small muted" style="margin:0">Watch reviews: <a href="${v.yt}" target="_blank" rel="noopener">YouTube</a> · <a href="${v.tt}" target="_blank" rel="noopener">TikTok</a></p>
+    ${alt ? `<div class="alt-box">${miniCard(alt)}<div class="grow"><div class="subhead">Good alternative</div><p style="margin:2px 0 0"><b>${esc(alt.name)}.</b> ${esc(altWhy)}</p><a class="link small" href="${alt.source}" target="_blank" rel="noopener">See offer</a></div></div>` : ""}
+  </article>`;
+}
+
+function renderExplore(){
+  const typed = ui.exploreQ;
+  let body = "";
+  if (typed){
+    const M = matchCards(typed);
+    const top = M.top;
+    body = `<p class="small muted" style="margin:0">${M.generic ? "I couldn't tell exactly what you want, so here's a balanced pick." : `Looking for: ${esc(M.intents.map(i => i.label).join(", "))}${M.issuer.length ? ` · ${esc(M.issuer.join(", "))}` : ""}`}</p>
+    ${top ? renderRec(top, M.reasons.length ? M.reasons : [top.f.base + " on everything"], M.alt && M.alt.c, M.alt ? compareCards(M.alt.c, top.c) : "", top.owned ? "You already have the best match" : "Best match") : ""}
+    ${M.ownedBest && !top.owned ? `<div class="note">${esc(M.ownedBest.c.name)}, which you already have, is also a strong fit.</div>` : ""}
+    ${M.others.length ? `<section><h2 class="sec">Also worth a look</h2><div class="list">${M.others.map(x => `<div class="item pad">${miniCard(x.c)}<span class="grow"><span class="item-title">${esc(x.c.name)}</span><span class="item-sub">${esc(x.parts.sort((a,b) => b.v - a.v).slice(0,2).map(p => p.i.why(x.f)).filter(Boolean).join(" · "))}</span><span class="item-sub num">${x.c.annualFee ? money(x.c.annualFee) + " annual fee" : "No annual fee"}</span></span><a class="link small" href="${x.c.source}" target="_blank" rel="noopener">Offer</a></div>`).join("")}</div></section>` : ""}`;
+  } else {
+    const g = ui.goal || suggestGoal(), ranked = rankGoal(g);
+    const top = ranked.find(x => !x.owned), rest = ranked.filter(x => x !== top);
+    const alt = rest.find(x => !x.owned);
+    body = `${top ? renderRec(top, top.why, alt && alt.c, alt ? compareCards(alt.c, top.c) : "") : `<div class="note">You already have every card we track for this. Nice wallet.</div>`}
+    <section><h2 class="sec">Other options</h2>
+      <div class="list">${rest.filter(x => x !== alt).map(x => `<div class="item pad">${miniCard(x.c)}<span class="grow"><span class="item-title">${esc(x.c.name)}</span><span class="item-sub">${esc(x.why)}</span><span class="item-sub num">${x.c.annualFee ? money(x.c.annualFee) + " annual fee" : "No annual fee"}</span></span>${x.owned ? `<span class="pill done">You have it</span>` : `<a class="link small" href="${x.c.source}" target="_blank" rel="noopener">Offer</a>`}</div>`).join("") || `<div class="empty">That's every card we track for this.</div>`}</div></section>`;
+  }
+  const g = typed ? null : (ui.goal || suggestGoal());
+  return `<header class="top"><button class="back" data-act="back">${IC.back} Back</button></header>
+  <section class="stack-lg" style="margin-top:14px">
+    <div class="stack" style="gap:6px"><h1 class="h1">Find a card</h1><p class="muted" style="margin:0">Tell us what you want, or pick what you spend the most on.</p></div>
+    <form class="ask-form" data-form="explore-ask" autocomplete="off">
+      <input id="explore-input" name="q" placeholder="A simple card that's great all around…" value="${esc(typed || "")}" enterkeyhint="search" aria-label="Describe the card you want">
+      <button class="ask-go" aria-label="Find">${IC.arrow}</button>
+    </form>
+    <div class="chips">${Object.entries(GOALS).map(([k,v]) => `<button class="chip ${k===g?"on":""}" data-act="goal" data-goal="${k}">${v.label}</button>`).join("")}</div>
+    ${body}
+    <p class="small muted" style="margin:0">We compare ${CARDS.filter(c => !c.closed).length} popular cards today. More are coming. This isn't financial advice, so check the issuer's rates and terms before you apply. Video links open search results from YouTube and TikTok, not videos we've reviewed.</p>
+  </section>`;
+}
+
+/* ---- Settings */
+function renderSettings(){
+  const s = S.settings;
+  const rem = [[14,"2 weeks before"],[7,"1 week before"],[3,"3 days before"],[0,"Last day"]];
+  return `${header()}
+  <section class="stack-lg" style="margin-top:14px">
+    <h1 class="h1">Settings</h1>
+    <section><h2 class="sec">My cards</h2>
+      <div class="list">${S.cards.map(i => { const c = cardById(i.id); return `<div class="item pad">${miniCard(c)}<span class="grow item-title">${esc(c.name)}</span><button class="link small" style="color:var(--bad)" data-act="remove-card" data-id="${c.id}">Remove</button></div>`; }).join("")}
+      <button class="item pad" data-act="add-card"><span class="grow item-title" style="text-align:left">Add a card</span>${IC.plus}</button></div></section>
+    <section class="stack" style="gap:10px"><h2 class="sec" style="margin:0">Remind me</h2>
+      <div class="chips">${rem.map(([d,l]) => `<button class="chip ${s.reminderDays===d?"on":""}" data-act="remind" data-days="${d}">${l}</button>`).join("")}</div>
+      <label class="item pad card-row" for="banner-toggle"><span class="grow">Show reminders on Home</span><input type="checkbox" id="banner-toggle" data-act="banner" ${s.banner?"checked":""}></label>
+      <p class="small muted" style="margin:0">Reminders show when you open vault. Phone notifications are coming later.</p></section>
+    <section class="stack" style="gap:10px"><h2 class="sec" style="margin:0">Your data</h2>
+      <div class="list">
+        <button class="item pad" data-act="export" data-kind="csv"><span class="grow item-title" style="text-align:left">Export history</span>${IC.arrow}</button>
+        <button class="item pad" data-act="export" data-kind="json"><span class="grow item-title" style="text-align:left">Back up</span>${IC.arrow}</button>
+        <button class="item pad" data-act="import"><span class="grow item-title" style="text-align:left">Restore a backup</span>${IC.arrow}</button>
+        <button class="item pad" data-act="reset"><span class="grow item-title" style="text-align:left;color:var(--bad)">Erase all data</span></button></div>
+      <p class="small muted" style="margin:0">${memoryOnly ? "This browser blocks storage, so changes won't be kept after you close the page." : "Saved on this device only. vault never asks for card numbers or bank logins."}</p></section>
+    <details class="done-d"><summary>Where our info comes from ${IC.chev}</summary>
+      <div class="card-box" style="margin-top:10px">${CARDS.map(c => { const un = BENEFITS.filter(b => b.cardId === c.id && !b.verified);
+        return `<div class="perk"><div class="grow small"><b>${esc(c.name)}</b> · checked ${fmtDate(parse(VERIFIED), true)} · <a href="${c.source}" target="_blank" rel="noopener">${new URL(c.source).hostname.replace("www.","")}</a>${un.map(b => `<div class="muted" style="margin-top:3px">Not yet confirmed: ${esc(b.name)}</div>`).join("")}${c.rental.level==="unknown"?`<div class="muted" style="margin-top:3px">Not yet confirmed: rental car coverage details</div>`:""}</div></div>`; }).join("")}</div></details>
+  </section>`;
+}
+
+/* ---- Sheets */
+function openSheet(s){ ui.sheet = s; renderSheet(); }
+function closeSheet(){ const after = ui.sheet && ui.sheet.after; ui.sheet = null; renderSheet(); if (after) after(); }
+function renderSheet(){
+  const root = $("#sheet-root"); const s = ui.sheet;
+  if (!s){ root.innerHTML = ""; document.body.style.overflow = ""; return; }
+  document.body.style.overflow = "hidden";
+  const body = { beta:sheetBeta, benefit:sheetBenefit, add:sheetAdd, bonus:sheetBonus, opened:sheetOpened, dates:sheetDates, export:sheetExport, import:sheetImport, confirm:sheetConfirm, menu:sheetMenu }[s.type](s);
+  root.innerHTML = `<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(s.label || "Details")}"><div class="grab"></div>${body}</div></div>`;
+  const f = root.querySelector("[autofocus]"); if (f) f.focus();
+}
+
+function sheetBenefit(s){
+  const b = benefitById(s.id), inst = S.cards.find(i => i.id === b.cardId), it = itemFor(b, inst, now()), c = it.card;
+  const st = s.draft || it.status;
+  const hist = Object.entries(S.tracking[b.id] || {}).filter(([k]) => k !== it.p.key).sort((a,b) => b[1].end.localeCompare(a[1].end));
+  const segs = [["unused","Not used"],["partial","Some"],["used","Used"],["na","Skip"]];
+  return `<div class="stack-lg">
+    <div class="stack" style="gap:4px"><span class="eyebrow">${esc(c.name)}</span><h2 class="h1" style="font-size:1.6rem">${esc(b.name)}</h2>
+      <p class="muted num" style="margin:0">${money(it.p.value)} for ${esc(it.p.label)} · ends ${fmtDate(it.p.end)}${it.done ? "" : ` (${it.days === 0 ? "today" : it.days + " days"})`}</p></div>
+    <div class="stack" style="gap:10px">
+      <div class="seg" role="radiogroup" aria-label="Status">${segs.map(([k,l]) => `<button role="radio" aria-checked="${st===k}" class="${st===k?"on":""}" data-act="status" data-id="${b.id}" data-status="${k}">${l}</button>`).join("")}</div>
+      ${st === "partial" ? `<form class="row-flex" data-form="partial" data-id="${b.id}"><div class="money grow"><span>$</span><input id="partial-amt" name="amt" inputmode="decimal" autofocus value="${it.status==="partial" ? it.used : ""}" placeholder="How much did you use?" aria-label="Amount used"></div><button class="btn btn-primary">Save</button></form>` : ""}
+      ${it.status === "partial" ? `<p class="small num" style="margin:0">${money(it.used)} used · <b>${money(it.remaining)} left</b></p>` : ""}</div>
+    <div class="stack" style="gap:14px">
+      <div><div class="subhead">What it is</div><p style="margin:4px 0 0">${esc(b.description)}</p></div>
+      <div><div class="subhead">How to use it</div><p style="margin:4px 0 0">${b.enrollment ? "<b>Turn it on first.</b> " : ""}${esc(b.activation)}</p></div>
+    </div>
+    <details class="done-d"><summary>Fine print ${IC.chev}</summary><p class="small" style="margin:8px 0 0">${esc(b.terms)} Works at: ${esc(b.merchants.join("; "))}.</p></details>
+    ${hist.length ? `<details class="done-d"><summary>Past periods (${hist.length}) ${IC.chev}</summary><div style="margin-top:8px">${hist.map(([k,r]) => `<div class="earn small"><span class="grow">${esc(r.label || k)}</span><span class="num">${r.status==="na" ? "Skipped" : `${money(r.status==="used" ? r.value : r.amount)} of ${money(r.value)}`}</span></div>`).join("")}</div></details>` : ""}
+    <p class="src" style="margin:0">${b.verified ? `Checked ${fmtDate(parse(b.verifiedOn), true)}` : `<span class="flag">Not yet confirmed by the issuer</span>`} · <a href="${b.sourceUrl}" target="_blank" rel="noopener">Source</a></p>
+    <button class="btn btn-block" data-act="close">Done</button>
+  </div>`;
+}
+
+function sheetAdd(s){
+  const q = (s.q || "").toLowerCase();
+  const list = CARDS.filter(c => !q || (c.fullName + " " + c.aliases.join(" ")).toLowerCase().includes(q));
+  return `<div class="stack-lg"><h2 class="h2">Add a card</h2>
+    <input class="input" id="card-search" data-act="search" placeholder="Search cards" value="${esc(s.q||"")}" autofocus aria-label="Search cards">
+    <div class="list">${list.map(c => { const have = S.cards.some(i => i.id === c.id); return `<div class="item pad">${miniCard(c)}<span class="grow item-title">${esc(c.fullName)}</span>${have ? `<span class="pill done">Added</span>` : `<button class="btn btn-small btn-primary" data-act="add" data-id="${c.id}">Add</button>`}</div>`; }).join("") || `<div class="empty">No match yet. More cards are coming.</div>`}</div>
+    <button class="btn btn-block" data-act="close">Close</button></div>`;
+}
+
+function sheetOpened(s){
+  const inst = S.cards.find(i => i.id === s.id), c = cardById(s.id);
+  return `<form class="stack-lg" data-form="opened" data-id="${s.id}">
+    <div class="stack" style="gap:6px"><h2 class="h2">When did you open your ${esc(c.name)}?</h2>
+      <p class="muted" style="margin:0">We'll remind you before your ${money(c.annualFee)} annual fee renews.</p></div>
+    <input class="input" type="date" id="opened-date" name="d" value="${esc(inst.openedDate||"")}" max="${iso(now())}" autofocus aria-label="Account open date">
+    <div class="row-flex"><button type="button" class="btn grow" data-act="close">${s.first ? "Skip for now" : "Cancel"}</button><button class="btn btn-primary grow">Save</button></div></form>`;
+}
+function sheetDates(s){
+  return `<form class="stack-lg" data-form="dates">
+    <div class="stack" style="gap:6px"><h2 class="h2">When did you open these cards?</h2>
+      <p class="muted" style="margin:0">We'll remind you before each annual fee renews. A rough date is fine.</p></div>
+    ${s.ids.filter(id => cardById(id).annualFee || BENEFITS.some(b => b.cardId === id && b.cycle === "anniversary")).map(id => `<div class="field"><label for="d-${id}">${esc(cardById(id).name)}</label><input class="input" type="date" id="d-${id}" name="${id}" max="${iso(now())}"></div>`).join("")}
+    <div class="row-flex"><button type="button" class="btn grow" data-act="close">Skip for now</button><button class="btn btn-primary grow">Save</button></div></form>`;
+}
+
+function sheetBonus(s){
+  const inst = S.cards.find(i => i.id === s.id), b = inst.bonus || { required:"", deadline:"", desc:"", spent:"" };
+  return `<form class="stack-lg" data-form="bonus" data-id="${s.id}"><h2 class="h2">Signup bonus</h2>
+    <div class="grid2">
+      <div class="field"><label for="b-required">Spend goal</label><div class="money"><span>$</span><input id="b-required" name="required" inputmode="decimal" required value="${esc(b.required)}" placeholder="6,000"></div></div>
+      <div class="field"><label for="b-deadline">Deadline</label><input class="input" type="date" id="b-deadline" name="deadline" value="${esc(b.deadline)}"></div>
+      <div class="field"><label for="b-spent">Spent so far</label><div class="money"><span>$</span><input id="b-spent" name="spent" inputmode="decimal" value="${esc(b.spent)}" placeholder="0"></div></div>
+      <div class="field"><label for="b-desc">Bonus</label><input class="input" id="b-desc" name="desc" placeholder="100,000 points" value="${esc(b.desc)}"></div>
+    </div>
+    <p class="small muted" style="margin:0">Find these in your offer. Update your spending here as you go.</p>
+    <div class="row-flex">${inst.bonus ? `<button type="button" class="btn btn-danger" data-act="bonus-clear" data-id="${s.id}">Remove</button>` : ""}<button type="button" class="btn grow" data-act="close">Cancel</button><button class="btn btn-primary grow">Save</button></div></form>`;
+}
+
+function sheetBeta(){
+  const off = ui.offsetDays || 0;
+  return `<div class="stack-lg"><div class="stack" style="gap:4px"><span class="eyebrow">Beta tools</span><h2 class="h2">Testing</h2>
+      <p class="small muted" style="margin:0">For you and testers. These only affect this device.</p></div>
+    <div class="list">
+      <button class="item pad" data-act="beta-restart"><span class="grow"><span class="item-title">Restart from the launch screen</span><span class="item-sub">Erases cards and history, like a brand-new user</span></span>${IC.arrow}</button>
+      <button class="item pad" data-act="beta-example"><span class="grow"><span class="item-title">Load the example wallet</span><span class="item-sub">Amex Gold, Platinum and Sapphire Reserve with sample activity</span></span>${IC.arrow}</button>
+    </div>
+    <div class="stack" style="gap:8px"><div class="subhead">Pretend it's a different day</div>
+      <p class="small muted" style="margin:0">Jump ahead to watch credits reset. App date: <b class="num">${fmtDate(now(), true)}</b></p>
+      <div class="chips"><button class="chip" data-act="beta-shift" data-d="7">+1 week</button><button class="chip" data-act="beta-shift" data-d="30">+1 month</button><button class="chip" data-act="beta-shift" data-d="91">+3 months</button><button class="chip ${off ? "" : "on"}" data-act="beta-shift" data-d="0">Today</button></div></div>
+    <button class="btn btn-block" data-act="close">Done</button></div>`;
+}
+function sheetMenu(){
+  const t = now(), fees = S.cards.map(i => feeStats(i.id, t));
+  const fee = fees.reduce((s,f) => s + f.fee, 0), saved = fees.reduce((s,f) => s + f.redeemed, 0);
+  return `<div class="stack-lg"><h2 class="h2">Stats</h2>
+    <div class="facts"><div class="fact"><span>Saved in ${t.getFullYear()}</span><b class="num">${money(saved)}</b></div><div class="fact"><span>Annual fees</span><b class="num">${money(fee)}</b></div></div>
+    <div class="card-box">${fees.map(f => `<div class="earn"><span class="grow">${esc(f.card.name)}</span><span class="num small">${money(f.redeemed)} of ${money(f.fee)} fee</span></div>`).join("")}</div>
+    <p class="small muted" style="margin:0">More stats are on the way.</p>
+    <button class="row-link subtle" data-act="beta"><span class="grow">Beta tools</span>${IC.arrow}</button>
+    <button class="row-link subtle" data-act="open-explore" data-goal="">${IC.spark}<span class="grow">Find a new card</span>${IC.arrow}</button>
+    <button class="btn btn-block" data-act="close">Close</button></div>`;
+}
+
+function exportData(kind){
+  if (kind === "json") return JSON.stringify(S, null, 2);
+  const rows = [["card","benefit","period","period_end","status","amount_used","credit_value","updated_at"]];
+  Object.entries(S.tracking).forEach(([id, per]) => { const b = benefitById(id); if (!b) return;
+    Object.entries(per).forEach(([k,r]) => rows.push([cardById(b.cardId).name, b.name, r.label||k, r.end, r.status, r.status==="used"?r.value:r.amount, r.value, r.at])); });
+  return rows.map(r => r.map(v => `"${String(v ?? "").replace(/"/g,'""')}"`).join(",")).join("\n");
+}
+function sheetExport(s){
+  return `<div class="stack-lg"><h2 class="h2">${s.kind === "csv" ? "Your history" : "Backup"}</h2>
+    <p class="small muted" style="margin:0">${s.kind === "csv" ? "Copy this into a spreadsheet." : "Copy this somewhere safe. Use Restore to bring it back."}</p>
+    <textarea class="input" id="export-text" readonly aria-label="Exported data">${esc(exportData(s.kind))}</textarea>
+    <div class="row-flex"><button class="btn grow" data-act="close">Close</button><button class="btn btn-primary grow" data-act="copy">Copy</button></div></div>`;
+}
+function sheetImport(s){
+  return `<form class="stack-lg" data-form="import"><h2 class="h2">Restore a backup</h2>
+    <textarea class="input" id="import-text" name="t" autofocus aria-label="Backup" placeholder="Paste your backup here"></textarea>
+    ${s.error ? `<p class="small" style="color:var(--bad);margin:0">${esc(s.error)}</p>` : ""}
+    <div class="row-flex"><button type="button" class="btn grow" data-act="close">Cancel</button><button class="btn btn-primary grow">Restore</button></div></form>`;
+}
+function sheetConfirm(s){
+  return `<div class="stack-lg"><h2 class="h2">${esc(s.title)}</h2><p class="muted" style="margin:0">${esc(s.text)}</p>
+    <div class="row-flex"><button class="btn grow" data-act="close">Cancel</button><button class="btn grow btn-accent" data-act="confirm-yes">${esc(s.yes)}</button></div></div>`;
+}
+
+/* ---- Main render */
+function render(){
+  const y = window.scrollY, app = $("#app");
+  if (ui.tab === "explore") app.innerHTML = renderExplore();
+  else if (!S.cards.length) app.innerHTML = renderOnboarding();
+  else app.innerHTML = ({ tracker:renderTracker, benefits:renderBenefits, settings:renderSettings }[ui.tab] || renderHome)();
+  renderTabbar();
+  if (ui.tab === "benefits" && S.cards.length){ const car = $("#carousel"), sel = car && car.querySelector(".sel"); if (sel){ ui.quietUntil = Date.now() + 400; car.scrollLeft = sel.offsetLeft - (car.clientWidth - sel.clientWidth)/2; } bindCarousel(); }
+  const on = document.querySelector(".toggle .tg.on"); if (on){ const t = on.parentElement; if (on.offsetLeft + on.offsetWidth > t.scrollLeft + t.clientWidth || on.offsetLeft < t.scrollLeft) t.scrollLeft = on.offsetLeft - 20; }
+  window.scrollTo(0, ui.keepScroll === false ? 0 : y); ui.keepScroll = true;
+}
+function bindCarousel(){
+  const car = $("#carousel"); if (!car) return; let to;
+  car.addEventListener("scroll", () => { clearTimeout(to); to = setTimeout(() => {
+    if (!car.isConnected || ui.tab !== "benefits" || Date.now() < (ui.quietUntil || 0) || ui.sheet) return;
+    const mid = car.scrollLeft + car.clientWidth/2; let best = null, bd = 1e9;
+    car.querySelectorAll(".ccard[data-id]").forEach(el => { const d = Math.abs(el.offsetLeft + el.clientWidth/2 - mid); if (d < bd){ bd = d; best = el; } });
+    if (best && best.dataset.id !== ui.card){ ui.card = best.dataset.id; render(); }
+  }, 140); }, { passive:true });
+}
+function toast(msg){ const r = $("#toast-root"); r.innerHTML = `<div class="toast" role="status">${esc(msg)}</div>`; clearTimeout(toast.t); toast.t = setTimeout(() => r.innerHTML = "", 2200); }
+function confetti(){ return; }
+function confettiOld(x, y){
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const colors = ["var(--accent)","var(--ink)","#E9B44C","var(--good)"];
+  for (let i = 0; i < 16; i++){ const s = document.createElement("span"); s.className = "confetti"; const a = Math.random()*Math.PI*2, d = 50 + Math.random()*70;
+    s.style.cssText = `left:${x}px;top:${y}px;background:${colors[i%4]};--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d - 30}px;--rot:${Math.random()*540}deg`; document.body.appendChild(s); setTimeout(() => s.remove(), 950); }
+}
+
+/* ---------- 6. ACTIONS --------------------------------------------------- */
+function addCard(id){ if (!S.cards.some(c => c.id === id)) S.cards.push({ id, openedDate:"", addedAt:iso(now()), bonus:null }); save(); }
+function loadExample(){
+  S = defaultState(); S.example = true;
+  ["amex-gold","amex-plat","csr"].forEach(addCard);
+  const t = now(), mark = (id, status, amount) => { const b = benefitById(id), inst = S.cards.find(i => i.id === b.cardId), p = periodOf(b, inst, t); if (p) setStatus(b, p, status, amount); };
+  S.cards.find(i => i.id === "csr").openedDate = iso(new Date(t.getFullYear()-1, (t.getMonth()+3)%12, 14));
+  S.cards.find(i => i.id === "amex-plat").openedDate = iso(new Date(t.getFullYear()-1, t.getMonth()+1, 2));
+  mark("gold-uber","used"); mark("gold-dunkin","partial",4.29); mark("plat-lulu","partial",45); mark("plat-digital","used"); mark("plat-airline","partial",120); mark("csr-travel","used"); mark("plat-equinox","na");
+  S.cards.find(i => i.id === "amex-plat").bonus = { required:8000, spent:5150, deadline:iso(new Date(+t + 23*DAY)), desc:"Welcome offer points" };
+  save();
+}
+function quickToggle(id, el){
+  const b = benefitById(id), inst = S.cards.find(i => i.id === b.cardId), p = periodOf(b, inst, now()), it = itemFor(b, inst, now());
+  if (it.status === "used" || it.status === "na"){ setStatus(b, p, "unused"); toast(`${b.name} unchecked`); }
+  else { setStatus(b, p, "used"); const r = el.getBoundingClientRect(); confetti(r.left + r.width/2, r.top + r.height/2); toast(`Marked as used`); }
+  render();
+}
+
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (ui.qmenu && !e.target.closest(".qmenu")){ ui.qmenu = false; if (!el) { render(); return; } }
+  if (!el) return;
+  const a = el.dataset.act, id = el.dataset.id;
+  if (a === "scrim"){ if (e.target === el) closeSheet(); return; }
+  if (a === "banner" || a === "search" || a === "onb-search") return;
+  if (a === "tab"){ ui.tab = el.dataset.tab; ui.keepScroll = false; closeSheet(); render(); return; }
+  if (a === "pick"){ ui.picks = ui.picks.includes(id) ? ui.picks.filter(x => x !== id) : [...ui.picks, id]; $("#onb-list").innerHTML = onbRows(); const f = $("[data-act=finish-onboarding]"); f.disabled = !ui.picks.length; f.textContent = ui.picks.length ? `Add ${ui.picks.length} card${ui.picks.length>1?"s":""}` : "Pick at least one card"; return; }
+  if (a === "finish-onboarding"){ if (!ui.picks.length) return; const ids = [...ui.picks]; ui.onbQ = ""; ids.forEach(addCard); ui.picks = []; ui.tab = "home"; render(); if (ids.some(id => cardById(id).annualFee || BENEFITS.some(b => b.cardId === id && b.cycle === "anniversary"))) openSheet({ type:"dates", ids, label:"Card open dates" }); else toast("Wallet ready. Ask me anything."); return; }
+  if (a === "example"){ loadExample(); ui.tab = "home"; render(); toast("Loaded an example wallet"); return; }
+  if (a === "open-explore"){ ui.prevTab = ui.tab === "explore" ? ui.prevTab : ui.tab; ui.goal = el.dataset.goal || ui.goal || null; ui.exploreQ = el.dataset.q || ""; ui.tab = "explore"; ui.keepScroll = false; if (ui.sheet) closeSheet(); render(); return; }
+  if (a === "goal"){ ui.goal = el.dataset.goal; ui.exploreQ = ""; render(); return; }
+  if (a === "back"){ ui.tab = ui.prevTab && ui.prevTab !== "explore" ? ui.prevTab : "home"; ui.keepScroll = false; render(); return; }
+  if (a === "beta"){ openSheet({ type:"beta", label:"Beta tools" }); return; }
+  if (a === "beta-restart"){ S = defaultState(); save(); ui.tab = "home"; ui.answer = null; ui.lastQ = ""; ui.picks = []; ui.onbQ = ""; ui.offsetDays = 0; ui.card = null; closeSheet(); render(); toast("Back to the launch screen"); return; }
+  if (a === "beta-example"){ loadExample(); ui.tab = "home"; ui.answer = null; closeSheet(); render(); toast("Loaded the example wallet"); return; }
+  if (a === "beta-shift"){ const d = +el.dataset.d; ui.offsetDays = d ? (ui.offsetDays || 0) + d : 0; renderSheet(); render(); toast(d ? `App date: ${fmtDate(now(), true)}` : "Back to today"); return; }
+  if (a === "menu"){ openSheet({ type:"menu", label:"Menu" }); return; }
+  if (a === "qmenu"){ ui.qmenu = !ui.qmenu; render(); return; }
+  if (a === "ask-chip"){ ui.qmenu = false; runAsk(el.dataset.q); return; }
+  if (a === "clear-answer"){ ui.answer = null; ui.lastQ = ""; render(); return; }
+  if (a === "cta"){ if (el.dataset.tab === "explore"){ ui.prevTab = ui.tab; ui.goal = el.dataset.goal || null; ui.exploreQ = el.dataset.q || ""; } ui.tab = el.dataset.tab; if (el.dataset.card) ui.card = el.dataset.card; ui.keepScroll = false; render(); if (el.dataset.benefit) openSheet({ type:"benefit", id:el.dataset.benefit, label:"Credit" }); return; }
+  if (a === "quick"){ quickToggle(id, el); return; }
+  if (a === "open-benefit"){ openSheet({ type:"benefit", id, label:"Credit" }); return; }
+  if (a === "status"){
+    const b = benefitById(id), inst = S.cards.find(i => i.id === b.cardId), p = periodOf(b, inst, now()), st = el.dataset.status;
+    if (st === "partial"){ ui.sheet.draft = "partial"; renderSheet(); return; }
+    ui.sheet.draft = null; setStatus(b, p, st);
+    if (st === "used"){ const r = el.getBoundingClientRect(); confetti(r.left + r.width/2, r.top); toast(`Marked as used`); }
+    renderSheet(); render(); return;
+  }
+  if (a === "close"){ closeSheet(); return; }
+  if (a === "select-card"){ ui.card = id; render(); return; }
+  if (a === "add-card"){ openSheet({ type:"add", q:"", label:"Add a card" }); return; }
+  if (a === "add"){ addCard(id); ui.card = id; if (ui.tab === "explore") ui.tab = "benefits"; toast(`${cardById(id).name} added`); render(); if (cardById(id).annualFee || BENEFITS.some(b => b.cardId === id && b.cycle === "anniversary")) openSheet({ type:"opened", id, first:true, label:"Account open date" }); else closeSheet(); return; }
+  if (a === "remove-card"){ openSheet({ type:"confirm", title:`Remove ${cardById(id).name}?`, text:"Your history is kept in case you add it back.", yes:"Remove", run:() => { S.cards = S.cards.filter(c => c.id !== id); save(); toast("Card removed"); } }); return; }
+  if (a === "confirm-yes"){ const run = ui.sheet.run; closeSheet(); run(); render(); return; }
+  if (a === "bonus-edit"){ openSheet({ type:"bonus", id, label:"Signup bonus" }); return; }
+  if (a === "bonus-clear"){ S.cards.find(i => i.id === id).bonus = null; save(); closeSheet(); render(); return; }
+  if (a === "edit-opened"){ openSheet({ type:"opened", id, label:"Account open date" }); return; }
+  if (a === "remind"){ S.settings.reminderDays = +el.dataset.days; save(); render(); toast("Saved"); return; }
+  if (a === "export"){ openSheet({ type:"export", kind:el.dataset.kind, label:"Export" }); return; }
+  if (a === "copy"){ const ta = $("#export-text"), fallback = () => { ta.select(); toast("Selected. Press Ctrl/Cmd+C to copy"); };
+    try { navigator.clipboard.writeText(ta.value).then(() => toast("Copied"), fallback); } catch(err){ fallback(); } return; }
+  if (a === "import"){ openSheet({ type:"import", label:"Restore" }); return; }
+  if (a === "reset"){ openSheet({ type:"confirm", title:"Erase everything?", text:"This removes your cards, history and settings from this device.", yes:"Erase", run:() => { S = defaultState(); save(); ui.tab = "home"; ui.answer = null; } }); return; }
+});
+
+document.addEventListener("toggle", e => { if (e.target.id === "done-d") ui.doneClosed = !e.target.open; }, true);
+document.addEventListener("change", e => {
+  if (e.target.dataset.act === "choice"){ S.cards.find(i => i.id === e.target.dataset.id).choice = e.target.value; save(); render(); toast("3% category saved"); return; } if (e.target.dataset.act === "banner"){ S.settings.banner = e.target.checked; save(); render(); } });
+document.addEventListener("input", e => {
+  if (e.target.dataset.act === "onb-search"){ ui.onbQ = e.target.value; $("#onb-list").innerHTML = onbRows(); return; }
+  if (e.target.dataset.act === "search"){ ui.sheet.q = e.target.value; const pos = e.target.selectionStart; renderSheet(); const i = $("#card-search"); i.focus(); i.setSelectionRange(pos,pos); }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape"){ if (ui.sheet) closeSheet(); else if (ui.qmenu){ ui.qmenu = false; render(); } } });
+
+document.addEventListener("submit", e => {
+  const f = e.target; e.preventDefault(); const k = f.dataset.form, id = f.dataset.id, fd = new FormData(f);
+  const num = x => parseFloat(String(x || "").replace(/[$,]/g,""));
+  if (k === "ask"){ runAsk(fd.get("q")); return; }
+  if (k === "explore-ask"){ ui.exploreQ = String(fd.get("q") || "").trim(); render(); return; }
+  if (k === "partial"){
+    const b = benefitById(id), inst = S.cards.find(i => i.id === b.cardId), p = periodOf(b, inst, now()), v = num(fd.get("amt"));
+    if (!(v >= 0)){ toast("Enter how much you used"); return; }
+    if (v >= p.value){ setStatus(b, p, "used"); toast(`Marked as used`); const r = f.getBoundingClientRect(); confetti(r.left + r.width/2, r.top); }
+    else if (v === 0) setStatus(b, p, "unused"); else { setStatus(b, p, "partial", v); toast(`${money(p.value - v)} left`); }
+    ui.sheet.draft = null; renderSheet(); render(); return;
+  }
+  if (k === "bonus"){
+    const inst = S.cards.find(i => i.id === id);
+    if (!(num(fd.get("required")) > 0)){ toast("Enter your spend goal"); return; }
+    inst.bonus = { deadline:fd.get("deadline"), required:num(fd.get("required")), spent:num(fd.get("spent")) || 0, desc:String(fd.get("desc")||"").slice(0,80) };
+    save(); closeSheet(); render(); toast("Signup bonus saved"); return;
+  }
+  if (k === "bonus-add"){
+    const inst = S.cards.find(i => i.id === id), v = num(fd.get("amt"));
+    if (!(v > 0)){ toast("Enter a purchase amount"); return; }
+    inst.bonus.spent = Math.round((+inst.bonus.spent + v)*100)/100; save(); render();
+    if (inst.bonus.spent >= inst.bonus.required){ confetti(innerWidth/2, innerHeight/2); toast("Spending goal met"); } else toast(`${money(inst.bonus.required - inst.bonus.spent)} to go`);
+    return;
+  }
+  if (k === "opened"){ S.cards.find(i => i.id === id).openedDate = fd.get("d") || ""; save(); closeSheet(); render(); toast("Saved"); return; }
+  if (k === "dates"){ ui.sheet.ids.forEach(cid => { const v = fd.get(cid); if (v) S.cards.find(i => i.id === cid).openedDate = v; }); save(); closeSheet(); render(); toast("Wallet ready. Ask me anything."); return; }
+  if (k === "import"){
+    try { const s = JSON.parse(fd.get("t")); if (!s || s.v !== 1 || !Array.isArray(s.cards)) throw 0;
+      s.cards = s.cards.filter(c => cardById(c.id)); S = Object.assign(defaultState(), s); save(); closeSheet(); ui.tab = "home"; render(); toast("Backup restored"); }
+    catch(err){ ui.sheet.error = "That doesn't look like a vault backup."; renderSheet(); }
+  }
+});
+
+function runAsk(q){
+  q = String(q || "").trim(); if (!q) return;
+  ui.lastQ = q; ui.answer = ask(q); render();
+  const a = $("#answer-card"); if (a){ a.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"nearest" }); a.focus({ preventScroll:true }); }
+}
+
+render();
+
+</script>
+
+<script>
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {})); }
+</script>
+</body>
+</html>
